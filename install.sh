@@ -1,7 +1,17 @@
 #!/bin/bash
 # Installer
 
-#SDK=/Applications/CASIO/SDK
+# Use All Available CPU Cores
+# CPU cores dynamically using the sysctl command: make -j$(sysctl -n hw.ncpu)
+# This runs as many jobs as there are CPU cores.
+
+# Use a Fixed Number of Jobs:
+# If you want to manually specify the number of jobs: make j4
+
+# Unlimited Jobs:
+# You can specify -j without a number to allow make to run as many jobs as it wants:
+
+
 export DIR=$(pwd)
 
 export FXCGSDK=$DIR/Prizm/SDK
@@ -74,15 +84,16 @@ if [ ! -d "$BINUTILS" ]; then
     fi
     tar -xzvf $BINUTILS.tar.gz
 fi
-result=Yes
 if [ -d "build-binutils" ]; then
     # Ask the user a question
     result=$(osascript -e 'display dialog "Do you want to re-build binutils?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
     if [[ "$result" == *"Yes"* ]]; then
-        rm -r build-binutils
+        rm -rf build-binutils
     fi
+else
+    read -p "Press Enter to continue..."
 fi
-if [[ "$result" == *"Yes"* ]]; then
+if [ ! -d "build-binutils" ]; then
     if [ ! -d "$HOMEBREW/Cellar/texinfo" ]; then
         brew install texinfo
     fi
@@ -95,7 +106,12 @@ if [[ "$result" == *"Yes"* ]]; then
     cd build-binutils
     echo "Compiling binutils"
     
-    ../$BINUTILS/configure --target=sh3eb-elf --prefix=$FXCGSDK --disable-nls --disable-multilib
+    ../$BINUTILS/configure \
+    --target=sh3eb-elf \
+    --prefix=$FXCGSDK \
+    --disable-nls \
+    --disable-multilib
+    
     make -j$(sysctl -n hw.ncpu)
     make install
     
@@ -103,7 +119,6 @@ if [[ "$result" == *"Yes"* ]]; then
 fi
 echo "binutils: Done!"
 
-read -p "Press Enter to continue..."
 
 # Compiling GCC
 
@@ -113,15 +128,16 @@ if [ ! -d "$GCC" ]; then
     fi
     tar -xzvf $GCC.tar.gz
 fi
-result=Yes
 if [ -d "build-gcc" ]; then
     # Ask the user a question
     result=$(osascript -e 'display dialog "Do you want to re-build gcc?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
     if [[ "$result" == *"Yes"* ]]; then
-        rm -r build-gcc
+        rm -rf build-gcc
     fi
+else
+    read -p "Press Enter to continue..."
 fi
-if [[ "$result" == *"Yes"* ]]; then
+if [ ! -d "build-gcc" ]; then
 #    cd $GCC
 #    ./contrib/download_prerequisites
 #    cd ..
@@ -153,17 +169,6 @@ if [[ "$result" == *"Yes"* ]]; then
     --disable-multilib \
     --without-headers
     
-    
-# Use All Available CPU Cores
-# CPU cores dynamically using the sysctl command: make -j$(sysctl -n hw.ncpu)
-# This runs as many jobs as there are CPU cores.
-
-# Use a Fixed Number of Jobs:
-# If you want to manually specify the number of jobs: make j4
-
-# Unlimited Jobs:
-# You can specify -j without a number to allow make to run as many jobs as it wants:
-
     make -j$(sysctl -n hw.ncpu) all
     make install-gcc
     
@@ -171,16 +176,23 @@ if [[ "$result" == *"Yes"* ]]; then
 fi
 echo "gcc: Done!"
 
-read -p "Press Enter to continue..."
 
 # Compiling mkg3a
 if [ ! -d "$MKG3A" ]; then
     tar -xzvf $MKG3A.tar.gz
 fi
 
-if [ "$(ls -A build-mkg3a)" ]; then
-    echo "mkg3a: Done!"
+if [ -d "build-mkg3a" ]; then
+    # Ask the user a question
+    result=$(osascript -e 'display dialog "Do you want to re-build mkg3a?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
+    if [[ "$result" == *"Yes"* ]]; then
+        rm -rf build-mkg3a
+    fi
 else
+    read -p "Press Enter to continue..."
+fi
+
+if [ ! -d "build-mkg3a" ]; then
     if [ ! -d "$HOMEBREW/Cellar/cmake" ]; then
         brew install cmake
     fi
@@ -194,23 +206,29 @@ else
 
     cd ..
 fi
+echo "mkg3a: Done!"
 
-read -p "Press Enter to continue..."
 
 # fx-CG Library
 if [ ! -d "$LIBFXCG" ]; then
     tar -xzvf $LIBFXCG.tar.gz
 fi
 
-if [ "$(ls -A $LIBFXCG/lib)" ]; then
+if [ -d "$LIBFXCG" ]; then
     # Ask the user a question
     result=$(osascript -e 'display dialog "Do you want to re-install libfxcg?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
+    if [[ "$result" == *"Yes"* ]]; then
+        rm -rf $LIBFXCG
+    fi
+else
+    read -p "Press Enter to continue..."
 fi
-if [[ "$result" == *"Yes"* ]]; then
+if [ ! -d "build-libfxcg" ]; then
+    tar -xzvf $LIBFXCG.tar.gz
     cd $LIBFXCG
     
     make -j$(sysctl -n hw.ncpu)
-
+    
     cp lib/*.a $FXCGSDK/lib/
     cp -a toolchain $FXCGSDK/
     cp -a include $FXCGSDK/
