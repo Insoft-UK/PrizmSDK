@@ -1,8 +1,7 @@
 # Getting started on macOS
 
 This document will walk you through the process of setting up the Prizm SDK and
-building your first add-in on macOS. If you don't use macOS, refer to the
-information in the [top-level README](../README.md).
+building your first add-in on macOS.
 
 ## Download and unpack the SDK
 
@@ -10,8 +9,6 @@ Download an SDK package from the [releases
 page](https://github.com//Insoft-UK/libfxcg/releases/) and unpack it somewhere.
 
 ![Extracted SDK package](img/sdk-dir.png)
-
-an install.sh script 
 
 ## Look at the example project
 
