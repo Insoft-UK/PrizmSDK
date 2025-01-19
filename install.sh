@@ -163,6 +163,8 @@ else
     cd ..
 fi
 
+find $SDK -type f -exec file {} \; | grep Mach-O | cut -d: -f1 | xargs strip > /dev/null 2>&1
+
 if [ ! -d "$HOMEBREW/Cellar/imagemagick" ]; then
     brew install imagemagick
 fi
