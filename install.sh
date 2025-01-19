@@ -7,6 +7,14 @@ export SDK=$DIR/PrizmSDK
 export PATH=$PATH:$SDK/bin
 HOMEBREW=/opt/homebrew
 
+ARCH=arch
+if [[ "$ARCH" == *"arm64"* ]]; then
+    result=$(osascript -e 'display dialog "AppleSilicon, do you want to compile for x86_64 instead." buttons {"Yes", "No"} default button "Yes"')
+    if [[ "$result" == *"Yes"* ]]; then
+        arch arch -x86_64 /bin/zsh
+    fi
+fi
+
 if [ ! -d "/opt/homebrew" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
