@@ -82,10 +82,6 @@ else
         brew install gcc
     fi
     
-#    if [ ! -d "$HOMEBREW/Cellar/libisl" ]; then
-#        brew install libisl
-#    fi
-    
     mkdir build-gcc
     cd build-gcc
     echo "Compiling gcc"
@@ -109,11 +105,8 @@ else
 # Unlimited Jobs:
 # You can specify -j without a number to allow make to run as many jobs as it wants:
 
-    make -j$(sysctl -n hw.ncpu) all-gcc
+    make -j$(sysctl -n hw.ncpu) all
     make install-gcc
-
-    make -j$(sysctl -n hw.ncpu) all-target-libgcc
-    make install-target-libgcc
     
     cd ..
 fi
