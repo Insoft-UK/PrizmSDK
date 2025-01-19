@@ -1,15 +1,51 @@
+#!/bin/bash
 # Installer
 
 #SDK=/Applications/CASIO/SDK
 export DIR=$(pwd)
 
-export SDK=$DIR/PrizmSDK
-export PATH=$PATH:$SDK/bin
+export FXCGSDK=$DIR/Prizm/SDK
+export PATH=$PATH:$FXCGSDK/bin
 HOMEBREW=/opt/homebrew
 
-ARCH=arch
+BINUTILS="binutils-2.37"
+GCC="gcc-14.2.0"
+
+#BINUTILS="binutils-2.34"
+#GCC="gcc-10.0.0"
+
+LIBFXCG="libfxcg-0.6"
+MKG3A="mkg3a-0.5.0"
+
+# Detect operating system
+OS=$(uname -s)
+
+# Detect hardware architecture
+ARCH=$(uname -m)
+
+echo "Operating System: $OS"
+echo "Architecture: $ARCH"
+
+export CC=gcc
+export CXX=g++
+
+if [ ! -d "$HOMEBREW/Cellar/gcc" ]; then
+    brew install gcc
+fi
+
+# Example: Check platform
+if [[ "$OS" == "Linux" && "$ARCH" == "x86_64" ]]; then
+    echo "Running on a 64-bit Linux platform."
+    exit
+elif [[ "$OS" == "Darwin" ]]; then
+    echo "Running on macOS."
+else
+    echo "Platform: $OS $ARCH"
+    exit
+fi
+
 if [[ "$ARCH" == *"arm64"* ]]; then
-    result=$(osascript -e 'display dialog "AppleSilicon, do you want to compile for x86_64 instead." buttons {"Yes", "No"} default button "Yes"')
+    result=$(osascript -e 'display dialog "AppleSilicon, do you want to compile for x86_64 instead." buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
     if [[ "$result" == *"Yes"* ]]; then
         arch arch -x86_64 /bin/zsh
     fi
@@ -19,10 +55,10 @@ if [ ! -d "/opt/homebrew" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-if [ ! -d "PrizmSDK" ]; then
-    mkdir $SDK
-    if [ ! -d "PrizmSDK" ]; then
-        echo "Failed to create PrizmSDK directory!"
+if [ ! -d "$FXCGSDK" ]; then
+    mkdir $FXCGSDK
+    if [ ! -d "$FXCGSDK" ]; then
+        echo "Failed to create the 'SDK' directory!"
         exit
     fi
 fi
@@ -31,15 +67,22 @@ fi
 # NOTE! for macOS use make -j$(sysctl -n hw.ncpu)
 
 # Compiling binutils
-if [ ! -d "binutils-2.43" ]; then
-    if [ ! -f "binutils-2.43.tar.gz" ]; then
-        curl -O https://sourceware.org/pub/binutils/releases/binutils-2.43.tar.gz
+
+if [ ! -d "$BINUTILS" ]; then
+    if [ ! -f "$BINUTILS.tar.gz" ]; then
+        curl -O https://sourceware.org/pub/binutils/releases/$BINUTILS.tar.gz
     fi
-    tar -xzvf binutils-2.43.tar.gz
+    tar -xzvf $BINUTILS.tar.gz
 fi
-if [ "$(ls -A build-binutils)" ]; then
-    echo "binutils: Done!"
-else
+result=Yes
+if [ -d "build-binutils" ]; then
+    # Ask the user a question
+    result=$(osascript -e 'display dialog "Do you want to re-build binutils?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
+    if [[ "$result" == *"Yes"* ]]; then
+        rm -r build-binutils
+    fi
+fi
+if [[ "$result" == *"Yes"* ]]; then
     if [ ! -d "$HOMEBREW/Cellar/texinfo" ]; then
         brew install texinfo
     fi
@@ -48,47 +91,63 @@ else
         brew install binutils
     fi
     
-    
-    
     mkdir build-binutils
     cd build-binutils
     echo "Compiling binutils"
     
-    ../binutils-2.43/configure --target=sh3eb-elf --prefix=$SDK --disable-nls --disable-multilib
+    ../$BINUTILS/configure --target=sh3eb-elf --prefix=$FXCGSDK --disable-nls --disable-multilib
     make -j$(sysctl -n hw.ncpu)
     make install
     
     cd ..
 fi
+echo "binutils: Done!"
 
 read -p "Press Enter to continue..."
 
 # Compiling GCC
-if [ ! -d "gcc-14.2.0" ]; then
-    if [ ! -f "gcc-14.2.0.tar.gz" ]; then
-        curl -O https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.gz
-    fi
-    tar -xzvf gcc-14.2.0.tar.gz
-fi
 
-if [ "$(ls -A build-gcc)" ]; then
-    echo "gcc: Done!"
-else
-    cd gcc-14.2.0
-    ./contrib/download_prerequisites
-    cd ..
+if [ ! -d "$GCC" ]; then
+    if [ ! -f "$GCC.tar.gz" ]; then
+        curl -O https://ftp.gnu.org/gnu/gcc/$GCC/$GCC.tar.gz
+    fi
+    tar -xzvf $GCC.tar.gz
+fi
+result=Yes
+if [ -d "build-gcc" ]; then
+    # Ask the user a question
+    result=$(osascript -e 'display dialog "Do you want to re-build gcc?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
+    if [[ "$result" == *"Yes"* ]]; then
+        rm -r build-gcc
+    fi
+fi
+if [[ "$result" == *"Yes"* ]]; then
+#    cd $GCC
+#    ./contrib/download_prerequisites
+#    cd ..
     
-    if [ ! -d "$HOMEBREW/Cellar/gcc" ]; then
-        brew install gcc
+    if [ ! -d "$HOMEBREW/Cellar/gmp" ]; then
+        brew install gmp
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/mpfr" ]; then
+        brew install mpfr
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/mpc" ]; then
+        brew install mpc
     fi
     
     mkdir build-gcc
     cd build-gcc
     echo "Compiling gcc"
 
-    ../gcc-14.2.0/configure \
+    ../$GCC/configure \
     --target=sh3eb-elf \
-    --prefix=$SDK \
+    --prefix=$FXCGSDK \
+    --with-gmp=/opt/homebrew/Cellar/gmp/6.3.0 \
+    --with-mpfr=/opt/homebrew/Cellar/mpfr/4.2.1 \
+    --with-mpc=/opt/homebrew/Cellar/libmpc/1.3.1 \
     --disable-nls \
     --enable-languages=c,c++ \
     --disable-multilib \
@@ -110,12 +169,13 @@ else
     
     cd ..
 fi
+echo "gcc: Done!"
 
 read -p "Press Enter to continue..."
 
 # Compiling mkg3a
-if [ ! -d "mkg3a-0.5.0" ]; then
-    tar -xzvf mkg3a-0.5.0.tar.gz
+if [ ! -d "$MKG3A" ]; then
+    tar -xzvf $MKG3A.tar.gz
 fi
 
 if [ "$(ls -A build-mkg3a)" ]; then
@@ -128,7 +188,7 @@ else
     mkdir build-mkg3a
     cd build-mkg3a
     
-    cmake ../mkg3a-0.5.0 -DCMAKE_INSTALL_PREFIX=$SDK
+    cmake ../$MKG3A -DCMAKE_INSTALL_PREFIX=$FXCGSDK
     make -j$(sysctl -n hw.ncpu)
     make install
 
@@ -138,25 +198,28 @@ fi
 read -p "Press Enter to continue..."
 
 # fx-CG Library
-if [ ! -d "libfxcg-0.6" ]; then
-    tar -xzvf libfxcg-0.6.tar.gz
+if [ ! -d "$LIBFXCG" ]; then
+    tar -xzvf $LIBFXCG.tar.gz
 fi
 
-if [ "$(ls -A libfxcg-0.6/lib)" ]; then
-    echo "libfxcg: Done!"
-else
-    cd libfxcg-0.6
+if [ "$(ls -A $LIBFXCG/lib)" ]; then
+    # Ask the user a question
+    result=$(osascript -e 'display dialog "Do you want to re-install libfxcg?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
+fi
+if [[ "$result" == *"Yes"* ]]; then
+    cd $LIBFXCG
     
     make -j$(sysctl -n hw.ncpu)
 
-    cp lib/*.a $SDK/lib/
-    cp -a toolchain $SDK/
-    cp -a include $SDK/
+    cp lib/*.a $FXCGSDK/lib/
+    cp -a toolchain $FXCGSDK/
+    cp -a include $FXCGSDK/
     
     cd ..
 fi
+echo "libfxcg: Done!"
 
-find $SDK -type f -exec file {} \; | grep Mach-O | cut -d: -f1 | xargs strip > /dev/null 2>&1
+find $FXCGSDK -type f -exec file {} \; | grep Mach-O | cut -d: -f1 | xargs strip > /dev/null 2>&1
 
 if [ ! -d "$HOMEBREW/Cellar/imagemagick" ]; then
     brew install imagemagick
