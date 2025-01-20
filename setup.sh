@@ -14,11 +14,9 @@
 export FXCGSDK=/Applications/CASIO/PrizmSDK
 HOMEBREW=/opt/homebrew
 
-BINUTILS="binutils-2.37"
+BINUTILS="binutils-2.43"
 GCC="gcc-14.2.0"
-
-#BINUTILS="binutils-2.34"
-#GCC="gcc-10.0.0"
+#GCC="gcc-10.1.0"
 
 LIBFXCG="libfxcg-0.6"
 MKG3A="mkg3a-0.5.0"
@@ -45,17 +43,16 @@ if [[ "$OS" == "Linux" && "$ARCH" == "x86_64" ]]; then
     exit
 elif [[ "$OS" == "Darwin" ]]; then
     echo "Running on macOS."
+    if [[ "$ARCH" == *"arm64"* ]]; then
+        echo "AppleSilicon"
+    else
+        echo "Intel"
+    fi
 else
     echo "Platform: $OS $ARCH"
     exit
 fi
 
-if [[ "$ARCH" == *"arm64"* ]]; then
-    result=$(osascript -e 'display dialog "AppleSilicon, do you want to compile for x86_64 instead." buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
-    if [[ "$result" == *"Yes"* ]]; then
-        arch arch -x86_64 /bin/zsh
-    fi
-fi
 
 if [ ! -d "/opt/homebrew" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -177,7 +174,7 @@ echo "gcc: Done!"
 # Compiling mkg3a
 if [ -d "$MKG3A" ]; then
     # Ask the user a question
-    result=$(osascript -e 'display dialog "Do you want to re-build mkg3a?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
+    result=$(osascript -e 'display dialog "Do you want to upgrade mkg3a?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
     if [[ "$result" == *"Yes"* ]]; then
         rm -rf $MKG3A
     fi
@@ -208,15 +205,12 @@ if [ ! -d "$LIBFXCG" ]; then
 fi
 
 if [ -d "$LIBFXCG" ]; then
-    # Ask the user a question
-    result=$(osascript -e 'display dialog "Do you want to re-install libfxcg?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
-    if [[ "$result" == *"Yes"* ]]; then
-        rm -rf $LIBFXCG
-    fi
-else
-    read -p "Press Enter to continue..."
+    rm -rf $LIBFXCG
+    echo "Upgrading libfxcg"
 fi
-if [ ! -d "build-libfxcg" ]; then
+read -p "Press Enter to continue..."
+
+if [ ! -d "$LIBFXCG" ]; then
     tar -xzvf $LIBFXCG.tar.gz
     cp prizm_rules $LIBFXCG/toolchain/prizm_rules
     cd $LIBFXCG
@@ -227,7 +221,6 @@ if [ ! -d "build-libfxcg" ]; then
     cp lib/*.a $FXCGSDK/lib/
     cp -a toolchain $FXCGSDK/
     cp -a include $FXCGSDK/
-    
     
     cd ..
 fi
@@ -242,4 +235,5 @@ fi
 if [ ! -d "~/Document/Prizm" ]; then
     cp -r Prizm ~/Documents
 fi
+
 
