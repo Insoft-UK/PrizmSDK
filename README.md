@@ -17,7 +17,7 @@ project to get you started with and looks like this:
 
 ![Example project directory layout](img/project-dir.png)
 
-The `selected.bmp` and `unselected.bmp` images are built into the compiled
+The `Icon~sel.bmp` and `Icon~uns.bmp` images are built into the compiled
 add-in and are the icons shown in the calculator's menus for the add-in when it
 is selected with the cursor and unselected, respectively.
 
@@ -28,14 +28,18 @@ what you're doing). If you're just getting started, it's safe to ignore this
 file. Similarly, `make` allows you to run a single command and compile the
 add-in and you shouldn't need to touch it.
 
+![Example project directory layout](img/example-dir.png)
 
 ## Compile the Example project
 
 To compile the Example project, simply run `make.sh` in the project directory
 using the Terminal.
 
+![Example project directory layout](img/open-terminal.png)
 
 The `Example.g3a` file is ready to send to your calculator for running now.
+
+![Example project directory layout](img/result.png)
 
 ## Making changes and rebuilding
 
