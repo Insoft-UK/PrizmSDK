@@ -6,13 +6,13 @@ building your first add-in on macOS.
 ## Download and unpack the PrizmSDK
 
 Download an PrizmSDK package from the [releases
-page](https://github.com//Insoft-UK/libfxcg/releases/) and unpack it somewhere.
+page](https://github.com//Insoft-UK/libfxcg/releases/) and unpack to your Applications/CASIO folder.
 
 ![Extracted SDK package](img/sdk-dir.png)
 
-## Look at the example project
+## Look at the Example project
 
-Navigate to `projects`, then `example`. This directory contains the example
+Navigate to `Projects`, then `Example`. This directory contains the example
 project to get you started with and looks like this:
 
 ![Example project directory layout](img/project-dir.png)
@@ -29,17 +29,17 @@ file. Similarly, `make` allows you to run a single command and compile the
 add-in and you shouldn't need to touch it.
 
 
-## Compile the Shuttle project
+## Compile the Example project
 
-To compile the Shuttle project, simply run `make` in the project directory
+To compile the Example project, simply run `make.sh` in the project directory
 using the Terminal.
 
 
-The `Shuttle.g3a` file is ready to send to your calculator for running now.
+The `Example.g3a` file is ready to send to your calculator for running now.
 
 ## Making changes and rebuilding
 
-Every time you run `make` as above, the system will rebuild the g3a file if
+Every time you run `make.sh` as above, the system will rebuild the g3a file if
 there have been any changes to the sources. It's possible that won't always work
 as you expect, so you can also run `.\make clean` to erase the output files from
 the compilation process and ensure you're building a totally fresh version.
@@ -47,6 +47,6 @@ the compilation process and ensure you're building a totally fresh version.
 ## Making your own project
 
 Now that you know how to build an add-in, it's time to write your own program.
-Make a copy of the `example` project and call it something else (probably a name
+Make a copy of the `Example` project and call it something else (probably a name
 related to what your project is), then you can write your own code however you
 like.
