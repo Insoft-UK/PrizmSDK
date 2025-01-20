@@ -1,12 +1,9 @@
 #!/bin/bash
-DIR=$(dirname "$0")
-cd $DIR
 clear
-export FXCGSDK=$DIR/../../SDK
 export NAME=$(basename $(pwd))
 export VERSION=$(head -n 1 version.txt | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-PATH=$FXCGSDK:$PATH
+export PATH=$FXCGSDK/bin:$PATH
 
 if [ -f "$NAME.g3a" ]; then
     rm "$NAME.g3a"

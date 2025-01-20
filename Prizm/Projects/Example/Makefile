@@ -6,11 +6,8 @@
 # Set toolchain location in an environment var for future use, this will change
 # to use a system environment var in the future.
 #---------------------------------------------------------------------------------
-ifeq ($(strip $(FXCGSDK)),)
-export FXCGSDK := /Applications/CASIO/PrizmSDK
-endif
 
-include $(FXCGSDK)/toolchain/prizm_rules
+include /Applications/CASIO/PrizmSDK/toolchain/prizm_rules
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -55,7 +52,7 @@ MKG3AFLAGS 	:= -n basic:$(NAME) -i uns:../Icon~uns.bmp -i sel:../Icon~sel.bmp -V
 CFLAGS	= -Os -Wall $(MACHDEP) $(INCLUDE) -ffunction-sections -fdata-sections
 CXXFLAGS	=	$(CFLAGS) -fno-exceptions
 
-LDFLAGS	= $(MACHDEP) -T$(FXCGSDK)/toolchain/prizm.x -Wl,-static -Wl,-gc-sections
+LDFLAGS	= $(MACHDEP) -T/Applications/CASIO/PrizmSDK/toolchain/prizm.x -Wl,-static -Wl,-gc-sections
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project

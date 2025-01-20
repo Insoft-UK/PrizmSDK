@@ -11,11 +11,7 @@
 # Unlimited Jobs:
 # You can specify -j without a number to allow make to run as many jobs as it wants:
 
-
-export DIR=$(pwd)
-
-export FXCGSDK=$DIR/Prizm/SDK
-export PATH=$PATH:$FXCGSDK/bin
+export FXCGSDK=/Applications/CASIO/PrizmSDK
 HOMEBREW=/opt/homebrew
 
 BINUTILS="binutils-2.37"
@@ -66,11 +62,8 @@ if [ ! -d "/opt/homebrew" ]; then
 fi
 
 if [ ! -d "$FXCGSDK" ]; then
-    mkdir $FXCGSDK
-    if [ ! -d "$FXCGSDK" ]; then
-        echo "Failed to create the 'SDK' directory!"
-        exit
-    fi
+    echo "Please first create the 'PrimeSDK' directory in your Applications folder in the 'CASIO' folder!"
+    exit
 fi
 
 # For multicore CPU with RAM to spare, to speed up builds use `make -j$(nproc)` instead of `make` for this guide.
@@ -106,11 +99,10 @@ if [ ! -d "build-binutils" ]; then
     cd build-binutils
     echo "Compiling binutils"
     
-    ../$BINUTILS/configure \
+    ../$BINUTILS/./configure \
     --target=sh3eb-elf \
     --prefix=$FXCGSDK \
-    --disable-nls \
-    --disable-multilib
+    --disable-nls
     
     make -j$(sysctl -n hw.ncpu)
     make install
@@ -138,9 +130,7 @@ else
     read -p "Press Enter to continue..."
 fi
 if [ ! -d "build-gcc" ]; then
-#    cd $GCC
-#    ./contrib/download_prerequisites
-#    cd ..
+    export PATH=$PATH:$FXCGSDK/bin
     
     if [ ! -d "$HOMEBREW/Cellar/gmp" ]; then
         brew install gmp
@@ -154,11 +144,16 @@ if [ ! -d "build-gcc" ]; then
         brew install mpc
     fi
     
+    if [ ! -d "$HOMEBREW/Cellar/ppl" ]; then
+        brew install ppl
+    fi
+    
+    
     mkdir build-gcc
     cd build-gcc
     echo "Compiling gcc"
-
-    ../$GCC/configure \
+    
+    ../$GCC/./configure \
     --target=sh3eb-elf \
     --prefix=$FXCGSDK \
     --with-gmp=/opt/homebrew/Cellar/gmp/6.3.0 \
@@ -166,11 +161,13 @@ if [ ! -d "build-gcc" ]; then
     --with-mpc=/opt/homebrew/Cellar/libmpc/1.3.1 \
     --disable-nls \
     --enable-languages=c,c++ \
-    --disable-multilib \
     --without-headers
     
-    make -j$(sysctl -n hw.ncpu) all
+    make -j$(sysctl -n hw.ncpu) all-gcc
     make install-gcc
+    
+#    make -j$(sysctl -n hw.ncpu) all-target-libgcc
+#    make install-target-libgcc
     
     cd ..
 fi
@@ -196,18 +193,19 @@ if [ ! -d "build-mkg3a" ]; then
     if [ ! -d "$HOMEBREW/Cellar/cmake" ]; then
         brew install cmake
     fi
+    
+    export PATH=$PATH:$FXCGSDK/bin
 
     mkdir build-mkg3a
     cd build-mkg3a
     
     cmake ../$MKG3A -DCMAKE_INSTALL_PREFIX=$FXCGSDK
-    make -j$(sysctl -n hw.ncpu)
+    make
     make install
 
     cd ..
 fi
 echo "mkg3a: Done!"
-
 
 # fx-CG Library
 if [ ! -d "$LIBFXCG" ]; then
@@ -225,13 +223,16 @@ else
 fi
 if [ ! -d "build-libfxcg" ]; then
     tar -xzvf $LIBFXCG.tar.gz
+    cp prizm_rules $LIBFXCG/toolchain/prizm_rules
     cd $LIBFXCG
     
-    make -j$(sysctl -n hw.ncpu)
+    export PATH=$PATH:$FXCGSDK/bin
+    make
     
     cp lib/*.a $FXCGSDK/lib/
     cp -a toolchain $FXCGSDK/
     cp -a include $FXCGSDK/
+    
     
     cd ..
 fi
