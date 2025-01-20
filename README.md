@@ -43,7 +43,7 @@ The `Example.g3a` file is ready to send to your calculator for running now.
 
 ## Making changes and rebuilding
 
-Every time you run `make.sh` as above, the system will rebuild the g3a file if
+Every time you run `make` as above, the system will rebuild the g3a file if
 there have been any changes to the sources. It's possible that won't always work
 as you expect, so you can also run `.\make clean` to erase the output files from
 the compilation process and ensure you're building a totally fresh version.
