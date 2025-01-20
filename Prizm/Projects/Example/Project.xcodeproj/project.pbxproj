@@ -75,7 +75,7 @@
 			buildConfigurationList = 13F59186294966AE00A35F54 /* Build configuration list for PBXLegacyTarget "CASIO" */;
 			buildPhases = (
 			);
-			buildToolPath = "$(PROJECT_DIR)/build.sh";
+			buildToolPath = "$(PROJECT_DIR)/make.sh";
 			buildWorkingDirectory = "$(PROJECT_DIR)";
 			dependencies = (
 			);
