@@ -240,6 +240,6 @@ if [ ! -d "$HOMEBREW/Cellar/imagemagick" ]; then
 fi
 
 if [ ! -d "~/Document/Prizm" ]; then
-    cp -r Prizm ~/Document
+    cp -r Prizm ~/Documents
 fi
 
