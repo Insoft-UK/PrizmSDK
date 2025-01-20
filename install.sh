@@ -175,31 +175,26 @@ echo "gcc: Done!"
 
 
 # Compiling mkg3a
-if [ ! -d "$MKG3A" ]; then
-    tar -xzvf $MKG3A.tar.gz
-fi
-
-if [ -d "build-mkg3a" ]; then
+if [ -d "$MKG3A" ]; then
     # Ask the user a question
     result=$(osascript -e 'display dialog "Do you want to re-build mkg3a?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
     if [[ "$result" == *"Yes"* ]]; then
-        rm -rf build-mkg3a
+        rm -rf $MKG3A
     fi
 else
     read -p "Press Enter to continue..."
 fi
 
-if [ ! -d "build-mkg3a" ]; then
+if [ ! -d "$MKG3A" ]; then
     if [ ! -d "$HOMEBREW/Cellar/cmake" ]; then
         brew install cmake
     fi
     
     export PATH=$PATH:$FXCGSDK/bin
-
-    mkdir build-mkg3a
-    cd build-mkg3a
+    tar -xzvf $MKG3A.tar.gz
+    cd $MKG3A
     
-    cmake ../$MKG3A -DCMAKE_INSTALL_PREFIX=$FXCGSDK
+    cmake . -DCMAKE_INSTALL_PREFIX=$FXCGSDK
     make
     make install
 
