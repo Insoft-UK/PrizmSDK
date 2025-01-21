@@ -54,3 +54,7 @@ Now that you know how to build an add-in, it's time to write your own program.
 Make a copy of the `Example` project and call it something else (probably a name
 related to what your project is), then you can write your own code however you
 like.
+
+>[!NOTE]
+>Syscall and helper library for the Casio FX-CG (Prizm) color graphing calculator
+><a href="https://github.com/Jonimoose/libfxcg">libfxcg</a>
