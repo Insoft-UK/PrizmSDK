@@ -1,6 +1,6 @@
 # Getting started on macOS
 
-This document will walk you through the process of setting up the Prizm SDK and
+This document will walk you through the process of setting up the <a href="https://github.com/Jonimoose/libfxcg">PrizmSDK</a> and
 building your first add-in on macOS.
 
 ## Download and unpack the PrizmSDK
