@@ -23,15 +23,6 @@
 # SOFTWARE.
 
 
-export FXCGSDK=$(pwd)/PrizmSDK
-HOMEBREW=/opt/homebrew
-
-BINUTILS="binutils-2.43"
-GCC="gcc-14.2.0"
-
-LIBFXCG="libfxcg-0.6"
-MKG3A="mkg3a-0.5.0"
-
 # Detect operating system
 OS=$(uname -s)
 
@@ -40,13 +31,6 @@ ARCH=$(uname -m)
 
 echo "Operating System: $OS"
 echo "Architecture: $ARCH"
-
-export CC=gcc
-export CXX=g++
-
-#if [ ! -d "$HOMEBREW/Cellar/gcc" ]; then
-#    brew install gcc
-#fi
 
 # Example: Check platform
 if [[ "$OS" == "Linux" && "$ARCH" == "x86_64" ]]; then
@@ -64,218 +48,109 @@ else
     exit
 fi
 
+if [ ! -d "/Applications/CASIO/PrizmSDK" ]; then
+    exit
+fi
+
+export FXCGSDK=/Applications/CASIO/PrizmSDK
+grep -qxF 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' ~/.zshrc || echo 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' >> ~/.zshrc
+grep -qxF 'export FXCGSDK=/Applications/CASIO/PrizmSDK' ~/.zshrc || echo 'export FXCGSDK=/Applications/CASIO/PrizmSDK' >> ~/.zshrc
+source ~/.zshrc
 
 if [ ! -d "/opt/homebrew" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-if [ -d "/Applications/CASIO/PrizmSDK" ]; then
-    echo "Setting-up 'PrimeSDK'"
-    if [ ! -d "$HOMEBREW/Cellar/gmp" ]; then
-        brew install gmp
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/mpfr" ]; then
-        brew install mpfr
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/mpc" ]; then
-        brew install mpc
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/libmpc" ]; then
-        brew install libmpc
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/libxdmcp" ]; then
-        brew install libxdmcp
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/ppl" ]; then
-        brew install ppl
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/texinfo" ]; then
-        brew install texinfo
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/libpng" ]; then
-        brew install libpng
-    fi
-    
-    exit
-fi
-
-# For multicore CPU with RAM to spare, to speed up builds use `make -j$(nproc)` instead of `make` for this guide.
-# NOTE! for macOS use make -j$(sysctl -n hw.ncpu)
-
-# Compiling binutils
-
-if [ ! -d "$BINUTILS" ]; then
-    if [ ! -f "$BINUTILS.tar.gz" ]; then
-        curl -O https://sourceware.org/pub/binutils/releases/$BINUTILS.tar.gz
-    fi
-    tar -xzvf $BINUTILS.tar.gz
-fi
-if [ -d "build-binutils" ]; then
-    # Ask the user a question
-    result=$(osascript -e 'display dialog "Do you want to re-build binutils?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
-    if [[ "$result" == *"Yes"* ]]; then
-        rm -rf build-binutils
-    fi
-else
-    read -p "Press Enter to continue..."
-fi
-if [ ! -d "build-binutils" ]; then
-    if [ ! -d "$HOMEBREW/Cellar/texinfo" ]; then
-        brew install texinfo
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/binutils" ]; then
-        brew install binutils
-    fi
-    
-    mkdir build-binutils
-    cd build-binutils
-    echo "Compiling binutils"
-    
-    ../$BINUTILS/./configure \
-    --target=sh3eb-elf \
-    --prefix=$FXCGSDK \
-    --disable-nls
-    
-    make -j$(sysctl -n hw.ncpu)
-    make install
-    
-    cd ..
-fi
-echo "binutils: Done!"
+brew install cmake gmp mpfr libmpc isl wget make gcc imagemagick
 
 
-# Compiling GCC
-
-if [ ! -d "$GCC" ]; then
-    if [ ! -f "$GCC.tar.gz" ]; then
-        curl -O https://ftp.gnu.org/gnu/gcc/$GCC/$GCC.tar.gz
-    fi
-    tar -xzvf $GCC.tar.gz
-fi
-if [ -d "build-gcc" ]; then
-    # Ask the user a question
-    result=$(osascript -e 'display dialog "Do you want to re-build gcc?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
-    if [[ "$result" == *"Yes"* ]]; then
-        rm -rf build-gcc
-    fi
-else
-    read -p "Press Enter to continue..."
-fi
-if [ ! -d "build-gcc" ]; then
-    export PATH=$PATH:$FXCGSDK/bin
-    
-    if [ ! -d "$HOMEBREW/Cellar/gmp" ]; then
-        brew install gmp
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/mpfr" ]; then
-        brew install mpfr
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/mpc" ]; then
-        brew install mpc
-    fi
-    
-    if [ ! -d "$HOMEBREW/Cellar/ppl" ]; then
-        brew install ppl
-    fi
-    
-    
-    mkdir build-gcc
-    cd build-gcc
-    echo "Compiling gcc"
-    
-    ../$GCC/./configure \
-    --target=sh3eb-elf \
-    --prefix=$FXCGSDK \
-    --with-gmp=/opt/homebrew/Cellar/gmp/6.3.0 \
-    --with-mpfr=/opt/homebrew/Cellar/mpfr/4.2.1 \
-    --with-mpc=/opt/homebrew/Cellar/libmpc/1.3.1 \
-    --disable-nls \
-    --enable-languages=c,c++ \
-    --without-headers
-    
-    make -j$(sysctl -n hw.ncpu) all-gcc
-    make install-gcc
-    
-#    make -j$(sysctl -n hw.ncpu) all-target-libgcc
-#    make install-target-libgcc
-    
-    cd ..
-fi
-echo "gcc: Done!"
-
-
-# Compiling mkg3a
-if [ -d "$MKG3A" ]; then
-    # Ask the user a question
-    result=$(osascript -e 'display dialog "Do you want to upgrade mkg3a?" buttons {"Yes", "No"} default button "No"' 2>/dev/null) >/dev/null
-    if [[ "$result" == *"Yes"* ]]; then
-        rm -rf $MKG3A
-    fi
-else
-    read -p "Press Enter to continue..."
-fi
-
-if [ ! -d "$MKG3A" ]; then
-    if [ ! -d "$HOMEBREW/Cellar/cmake" ]; then
-        brew install cmake
-    fi
-    
-    export PATH=$PATH:$FXCGSDK/bin
-    tar -xzvf $MKG3A.tar.gz
-    cd $MKG3A
-    
-    cmake . -DCMAKE_INSTALL_PREFIX=$FXCGSDK
-    make
-    make install
-
-    cd ..
-fi
-echo "mkg3a: Done!"
-
-# fx-CG Library
-if [ ! -d "$LIBFXCG" ]; then
-    tar -xzvf $LIBFXCG.tar.gz
-fi
-
-if [ -d "$LIBFXCG" ]; then
-    rm -rf $LIBFXCG
-    echo "Upgrading libfxcg"
-fi
-
-if [ ! -d "$LIBFXCG" ]; then
-    tar -xzvf $LIBFXCG.tar.gz
-    cp prizm_rules $LIBFXCG/toolchain/prizm_rules
-    cd $LIBFXCG
-    
-    export PATH=$PATH:$FXCGSDK/bin
-    make
-    
-    cp lib/*.a $FXCGSDK/lib/
-    cp -a toolchain $FXCGSDK/
-    cp -a include $FXCGSDK/
-    
-    cd ..
-fi
-echo "libfxcg: Done!"
-
-find $FXCGSDK -type f -exec file {} \; | grep Mach-O | cut -d: -f1 | xargs strip > /dev/null 2>&1
-
-if [ ! -d "$HOMEBREW/Cellar/imagemagick" ]; then
-    brew install imagemagick
-fi
-
+mkdir -p ~/sh3eb-toolchain
+cp prizm_rules ~/sh3eb-toolchain/prizm_rules
 if [ ! -d "~/Document/Prizm" ]; then
     cp -r Prizm ~/Documents
 fi
+cd ~/sh3eb-toolchain
 
-./check.sh
+if [ ! -d "gcc" ]; then
+    if [ ! -f "gcc-14.2.0.tar.gz" ]; then
+        wget https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.gz
+    fi
+    mkdir -p gcc
+    tar -xzvf gcc-14.2.0.tar.gz --strip-components=1 -C gcc
+fi
+
+
+if [ ! -d "binutils" ]; then
+    if [ ! -f "binutils-2.36.tar.gz" ]; then
+        wget https://ftp.gnu.org/gnu/binutils/binutils-2.36.tar.gz
+    fi
+    mkdir -p binutils
+    tar -xvzf binutils-2.36.tar.gz --strip-components=1 -C binutils
+fi
+
+if [ ! -d "binutils/build" ]; then
+    mkdir ~/sh3eb-toolchain/binutils/build
+    cd ~/sh3eb-toolchain/binutils/build
+    ../configure --target=sh3eb-elf --prefix=/Applications/CASIO/PrizmSDK --disable-nls --disable-werror
+    make -j$(sysctl -n hw.ncpu) # Use all CPU cores
+    make install
+fi
+
+/Applications/CASIO/PrizmSDK/bin/sh3eb-elf-as --version
+/Applications/CASIO/PrizmSDK/bin/sh3eb-elf-ld --version
+read -p "Press Enter to continue..."
+
+if [ ! -d "gcc/build" ]; then
+    mkdir ~/sh3eb-toolchain/gcc/build
+    cd ~/sh3eb-toolchain/gcc/build
+    ../configure \
+    --prefix=/Applications/CASIO/PrizmSDK \
+    --target=sh3eb-elf \
+    --enable-languages=c,c++ \
+    --with-gmp=/opt/homebrew/opt/gmp \
+    --with-mpfr=/opt/homebrew/opt/mpfr \
+    --with-mpc=/opt/homebrew/opt/libmpc \
+    --without-headers \
+    --disable-nls \
+    --disable-libssp
+
+    make -j$(sysctl -n hw.ncpu) all-gcc
+    make install-gcc
+    
+    
+fi
+/Applications/CASIO/PrizmSDK/bin/sh3eb-elf-gcc --version
+find /Applications/CASIO/PrizmSDK -name "sh3eb-elf-gcc"
+read -p "Press Enter to continue..."
+
+if [ ! -d "mkg3a" ]; then
+    git clone https://github.com/tari/mkg3a.git
+fi
+cd ~/sh3eb-toolchain/mkg3a
+cmake . -DCMAKE_INSTALL_PREFIX=/Applications/CASIO/PrizmSDK
+make
+make install
+read -p "Press Enter to continue..."
+
+if [ ! -d "libfxcg" ]; then
+    git clone https://github.com/Jonimoose/libfxcg.git
+fi
+cd ~/sh3eb-toolchain/libfxcg
+#make CC=/Applications/CASIO/PrizmSDK/sh3eb-elf/bin/sh3eb-elf-gcc
+make
+make install
+
+cp lib/*.a /Applications/CASIO/PrizmSDK/lib/
+cp -a toolchain /Applications/CASIO/PrizmSDK/
+cp -a include /Applications/CASIO/PrizmSDK/
+cd ~/sh3eb-toolchain
+cp prizm_rules $LIBFXCG/toolchain
+read -p "Press Enter to continue..."
+
+export PATH=/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:/Applications/CASIO/PrizmSDK/bin:$PATH
+# Add this line to your ~/.zshrc or ~/.bashrc to make the change permanent.
+
+
+find /Applications/CASIO/PrizmSDK -type f -exec file {} \; | grep Mach-O | cut -d: -f1 | xargs strip > /dev/null 2>&1
+rm ~/sh3eb-toolchain
+

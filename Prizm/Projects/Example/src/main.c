@@ -23,6 +23,10 @@
 #include <fxcg/display.h>
 #include <fxcg/keyboard.h>
 
+//int AddIn_main(int isAppli, unsigned short OptionNum) {
+//    // Your code here
+//    return 0;
+//}
 int main(void) {
     int key;
     
