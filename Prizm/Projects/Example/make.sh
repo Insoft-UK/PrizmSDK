@@ -2,7 +2,7 @@
 clear
 export NAME=$(basename $(pwd))
 export VERSION=$(head -n 1 version.txt | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-
+export FXCGSDK=/Applications/CASIO/PrizmSDK
 export PATH=$FXCGSDK/bin:$PATH
 
 if [ -f "$NAME.g3a" ]; then

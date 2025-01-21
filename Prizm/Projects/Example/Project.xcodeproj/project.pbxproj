@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		136E645C2D3F10C10054E0CC /* Example.g3a */ = {isa = PBXFileReference; lastKnownFileType = file; path = Example.g3a; sourceTree = "<group>"; };
 		139CE24F2BBA11E8006ED37C /* version.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = version.txt; sourceTree = "<group>"; };
 		139CE25B2BBB4A3F006ED37C /* Icon~sel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon~sel.png"; sourceTree = "<group>"; };
 		139CE25C2BBB4A3F006ED37C /* Icon~uns.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon~uns.png"; sourceTree = "<group>"; };
@@ -52,6 +53,7 @@
 		13F5917E294966AE00A35F54 = {
 			isa = PBXGroup;
 			children = (
+				136E645C2D3F10C10054E0CC /* Example.g3a */,
 				139CE24F2BBA11E8006ED37C /* version.txt */,
 				1328C37F2BD9620E003C4B3A /* CASIO */,
 				13919DD929A2D0AE008277AA /* Products */,

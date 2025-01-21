@@ -1,18 +1,21 @@
-export	LIBFXCG_INC	:=	/Applications/CASIO/PrizmSDK/include
-export	UTILS_INC	:=	/Applications/CASIO/PrizmSDK/utils
-export	LIBFXCG_LIB	:=	/Applications/CASIO/PrizmSDK/lib
+ifeq ($(strip $(FXCGSDK)),)
+$(error "Please set FXCGSDK in your environment. export FXCGSDK=<path to sdk location>)
+endif
+
+export	LIBFXCG_INC	:=	$(FXCGSDK)/include
+export	LIBFXCG_LIB	:=	$(FXCGSDK)/lib
 
 MACHDEP = -mb -m4a-nofpu -mhitachi -nostdlib
 
 #---------------------------------------------------------------------------------
 # path to tools 
 #---------------------------------------------------------------------------------
-export PATH	:=	/Applications/CASIO/PrizmSDK/bin:$(PATH)
+export PATH	:=	$(FXCGSDK)/bin:$(PATH)
 
 #---------------------------------------------------------------------------------
 # the prefix on the compiler executables
 #---------------------------------------------------------------------------------
-PREFIX	:=	/Applications/CASIO/PrizmSDK/bin/sh3eb-elf-
+PREFIX	:=	sh3eb-elf-
 
 export AS	:=	$(PREFIX)as
 export CC	:=	$(PREFIX)gcc
@@ -54,11 +57,11 @@ endif
 
 #---------------------------------------------------------------------------------
 %.o: %.cpp
-	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d -DTARGET_PRIZM=1 $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
+	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
 	
 #---------------------------------------------------------------------------------
 %.o: %.c
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -DTARGET_PRIZM=1 $(CFLAGS) -c $< -o $@ $(ERROR_FILTER)
+	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 %.o: %.m

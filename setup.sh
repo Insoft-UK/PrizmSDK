@@ -1,22 +1,33 @@
 #!/bin/bash
-# Installer
 
-# Use All Available CPU Cores
-# CPU cores dynamically using the sysctl command: make -j$(sysctl -n hw.ncpu)
-# This runs as many jobs as there are CPU cores.
+# MIT License
+# 
+# Copyright (c) 2025 insoft
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-# Use a Fixed Number of Jobs:
-# If you want to manually specify the number of jobs: make j4
 
-# Unlimited Jobs:
-# You can specify -j without a number to allow make to run as many jobs as it wants:
-
-export FXCGSDK=/Applications/CASIO/PrizmSDK
+export FXCGSDK=$(pwd)/PrizmSDK
 HOMEBREW=/opt/homebrew
 
 BINUTILS="binutils-2.43"
 GCC="gcc-14.2.0"
-#GCC="gcc-10.1.0"
 
 LIBFXCG="libfxcg-0.6"
 MKG3A="mkg3a-0.5.0"
@@ -33,9 +44,9 @@ echo "Architecture: $ARCH"
 export CC=gcc
 export CXX=g++
 
-if [ ! -d "$HOMEBREW/Cellar/gcc" ]; then
-    brew install gcc
-fi
+#if [ ! -d "$HOMEBREW/Cellar/gcc" ]; then
+#    brew install gcc
+#fi
 
 # Example: Check platform
 if [[ "$OS" == "Linux" && "$ARCH" == "x86_64" ]]; then
@@ -58,8 +69,40 @@ if [ ! -d "/opt/homebrew" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-if [ ! -d "$FXCGSDK" ]; then
-    echo "Please first create the 'PrimeSDK' directory in your Applications folder in the 'CASIO' folder!"
+if [ -d "/Applications/CASIO/PrizmSDK" ]; then
+    echo "Setting-up 'PrimeSDK'"
+    if [ ! -d "$HOMEBREW/Cellar/gmp" ]; then
+        brew install gmp
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/mpfr" ]; then
+        brew install mpfr
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/mpc" ]; then
+        brew install mpc
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/libmpc" ]; then
+        brew install libmpc
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/libxdmcp" ]; then
+        brew install libxdmcp
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/ppl" ]; then
+        brew install ppl
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/texinfo" ]; then
+        brew install texinfo
+    fi
+    
+    if [ ! -d "$HOMEBREW/Cellar/libpng" ]; then
+        brew install libpng
+    fi
+    
     exit
 fi
 
@@ -208,7 +251,6 @@ if [ -d "$LIBFXCG" ]; then
     rm -rf $LIBFXCG
     echo "Upgrading libfxcg"
 fi
-read -p "Press Enter to continue..."
 
 if [ ! -d "$LIBFXCG" ]; then
     tar -xzvf $LIBFXCG.tar.gz
@@ -236,4 +278,4 @@ if [ ! -d "~/Document/Prizm" ]; then
     cp -r Prizm ~/Documents
 fi
 
-
+./check.sh
