@@ -133,7 +133,7 @@ make install
 read -p "Press Enter to continue..."
 
 if [ ! -d "libfxcg" ]; then
-    git clone https://github.com/Jonimoose/libfxcg.git
+    git clone https://github.com/Insoft-UK/libfxcg.git
 fi
 cd ~/sh3eb-toolchain/libfxcg
 #make CC=/Applications/CASIO/PrizmSDK/sh3eb-elf/bin/sh3eb-elf-gcc
