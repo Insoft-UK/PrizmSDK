@@ -8,6 +8,13 @@ Download an PrizmSDK package from the [releases page](https://github.com//Insoft
 
 ![Extracted SDK package](img/sdk-dir.png)
 
+```
+export FXCGSDK=/Applications/CASIO/PrizmSDK
+grep -qxF 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' ~/.zshrc || echo 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' >> ~/.zshrc
+grep -qxF 'export FXCGSDK=/Applications/CASIO/PrizmSDK' ~/.zshrc || echo 'export FXCGSDK=/Applications/CASIO/PrizmSDK' >> ~/.zshrc
+source ~/.zshrc
+```
+
 ## Look at the Example project
 
 Navigate to `Projects`, then `Example`. This directory contains the example project to get you started with and looks like this:
