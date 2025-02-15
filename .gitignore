@@ -1,5 +1,6 @@
 .DS_Store
 releases
+installer/build
 build-*
 binutils-*
 gcc-*

@@ -1,0 +1,6 @@
+#!/bin/bash
+cd $(dirname "$0")
+clear
+
+magick Icon~uns.png -ordered-dither o4x4,32,64,32 Icon~uns.bmp
+magick Icon~sel.png -ordered-dither o4x4,32,64,32 Icon~sel.bmp
