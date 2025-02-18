@@ -6,3 +6,4 @@ binutils-*
 gcc-*
 mkg3a-0.5.0
 libfxcg-0.6
+*.pkg
