@@ -20,24 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#ifndef __clang__
+#define AddIn_main main
+#endif
+
 #include <fxcg/display.h>
 #include <fxcg/keyboard.h>
+#include <fxcg/system.h>
 
-#define AddIn_main main
+#include <graphics.h>
 
-int AddIn_main(int argc, const char * argv[])
-{
+int AddIn_main(int argc, const char * argv[]) {
     int key;
     
     Bdisp_AllClr_VRAM();
     Print_OS("Press EXE to exit", 0, 0);
-    
+    int x = 0, y = 0;
+    PrintMiniMini(&x, &y, "Press EXE to exit\xE5 ", 1, 2, 0);
+
     while (1) {
         GetKey(&key);
         
         if (key == KEY_CTRL_EXE) {
             break;
         }
+        
+        OS_InnerWait_ms(100000);
     }
     
     return 0;

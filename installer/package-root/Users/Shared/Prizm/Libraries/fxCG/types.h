@@ -36,14 +36,13 @@
 #define SAF_TEXT                0x0100
 #define SAF_GLYPH               0x0200
 
-typedef unsigned short FXCG_TColor;
 
-enum Screen : uint16_t {
+enum Screen {
     FXCG_SCREEN_WIDTH = 384,
     FXCG_SCREEN_HEIGHT = 216
-} FXCG_Screen;
+};
 
-enum Color : color_t {
+enum Color {
     FXCG_COLOR_BLACK   = 0,
     FXCG_COLOR_BLUE    = 0x001F,
     FXCG_COLOR_GREEN   = 0x07E0,
@@ -52,6 +51,6 @@ enum Color : color_t {
     FXCG_COLOR_MAGENTA = 0xF81F,
     FXCG_COLOR_YELLOW  = 0xFFE0,
     FXCG_COLOR_WHITE   = 0xFFFF
-} FXCG_Color;
+};
 
 #endif // types_h

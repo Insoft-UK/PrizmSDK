@@ -24,6 +24,7 @@
 #define key_h
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef enum {
     F1    = 79, F2       = 69, F3     = 59, F4    = 49, F5     = 39, F6    = 29,
@@ -39,55 +40,62 @@ typedef enum {
 
 uint16_t* reg(void);
 
-typedef uint8_t keycode_t;
+typedef uint8_t FXCG_TKeyCode;
 
-/**
- @brief    Reset key states.
- */
-void FXCG_keyReset(void);
-
-/**
- @brief    Takes a key reading of the keyboard register.
- */
-void FXCG_keyUpdate(void);
-
-/**
- @brief    Returns key code of key that is being held down.
- 
- keyUpdate required before using this function.
- */
-KeyCode FXCG_keyHeld(void);
-
-/**
- @brief    Returns key code of key that has been pressed down.
- 
- keyUpdate required before using this function.
- */
-KeyCode FXCG_keyPressed(void);
-
-/**
- @brief    Returns true if key has is being held down.
- @param    code  The fx-CGxx key code.
- 
- keyUpdate not required.
- */
-bool FXCG_isKeyHeld(KeyCode code);
-
-/**
- @brief    Returns true if key has just been pressed.
- @param    code  The fx-CGxx key code.
- 
- keyUpdate required before using this function.
- */
-bool FXCG_isKeyPressed(KeyCode code);
-
-/**
- @brief    Returns true if key has just been released
- @param    code  The fx-CGxx key code.
- 
- keyUpdate required before using this function.
- */
-bool FXCG_isKeyReleased(KeyCode code);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+    /**
+     @brief    Reset key states.
+     */
+    void FXCG_keyReset(void);
+    
+    /**
+     @brief    Takes a key reading of the keyboard register.
+     */
+    void FXCG_keyUpdate(void);
+    
+    /**
+     @brief    Returns key code of key that is being held down.
+     
+     keyUpdate required before using this function.
+     */
+    uint16_t *FXCG_keyHeld(void);
+    
+    /**
+     @brief    Returns key code of key that has been pressed down.
+     
+     keyUpdate required before using this function.
+     */
+    uint16_t *FXCG_keyPressed(void);
+    
+    /**
+     @brief    Returns true if key has is being held down.
+     @param    code  The fx-CGxx key code.
+     
+     keyUpdate not required.
+     */
+    bool FXCG_isKeyHeld(FXCG_TKeyCode code);
+    
+    /**
+     @brief    Returns true if key has just been pressed.
+     @param    code  The fx-CGxx key code.
+     
+     keyUpdate required before using this function.
+     */
+    bool FXCG_isKeyPressed(FXCG_TKeyCode code);
+    
+    /**
+     @brief    Returns true if key has just been released
+     @param    code  The fx-CGxx key code.
+     
+     keyUpdate required before using this function.
+     */
+    bool FXCG_isKeyReleased(FXCG_TKeyCode code);
+    
+#ifdef __cplusplus
 }
+#endif
 
 #endif /* key_h */

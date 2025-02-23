@@ -89,7 +89,7 @@ static struct {
 
 uint16_t* FXCG_keyReg(void)
 {
-    return (uint16_t *)FXCG50_KEY_REG;
+    return (uint16_t *)FXCG_KEY_REG;
 }
 
 void FXCG_keyUpdate(void)
@@ -114,30 +114,30 @@ void FXCG_keyReset(void)
     }
 }
 
-static KeyCode FXCG_keyCode(const uint16_t* reg)
-{
-    for (int row = 0; row < 9; row++) {
-        int word = row >> 1;
-        if (!reg[word]) continue;
-        
-        for (int col = 0; col < 8; col++) {
-            int bit = col + 8 * ( row & 1 );
-            if (reg[word] & (1 << bit))
-                return (key::Keycode)((col + 1) * 10 + row);
-        }
-    }
+//static uint16_t FXCG_keyCode(const uint16_t* reg)
+//{
+//    for (int row = 0; row < 9; row++) {
+//        int word = row >> 1;
+//        if (!reg[word]) continue;
+//        
+//        for (int col = 0; col < 8; col++) {
+//            int bit = col + 8 * ( row & 1 );
+//            if (reg[word] & (1 << bit))
+//                return (uint16_t)((col + 1) * 10 + row);
+//        }
+//    }
+//
+//    return 0;
+//}
 
-    return key::NONE;
+uint16_t *FXCG_keyHeld(void)
+{
+    return _key.held;
 }
 
-KeyCode FXCG_keyHeld(void)
+uint16_t *FXCG_keyPessed(void)
 {
-    return keycode(_key.held);
-}
-
-KeyCode FXCG_keyPessed(void)
-{
-    return FXCG_keyCode(_key.pressed);
+    return _key.pressed;
 }
 
 /**
@@ -145,7 +145,7 @@ KeyCode FXCG_keyPessed(void)
  @param    keycode  The fx-CGxx key code.
  @param    data The status data of the keyboard.
  */
-static bool FXCG_isKeyHold(KeyCode code, const uint16_t *data)
+static bool FXCG_isKeyHold(FXCG_TKeyCode code, const uint16_t *data)
 {
     int row = code % 10;
     int col = code / 10 - 1;
@@ -157,19 +157,19 @@ static bool FXCG_isKeyHold(KeyCode code, const uint16_t *data)
 }
 
 
-bool FXCG_isKeyHeld(KeyCode code)
+bool FXCG_isKeyHeld(FXCG_TKeyCode code)
 {
-    return fxIsKeyHold(code, _keyboardRegister);
+    return FXCG_isKeyHold(code, _keyboardRegister);
 }
 
 
-bool FXCG_isKeyPressed(KeyCode code)
+bool FXCG_isKeyPressed(FXCG_TKeyCode code)
 {
-    return fxIsKeyHold(code, _key.pressed);
+    return FXCG_isKeyHold(code, _key.pressed);
 }
 
 
-bool FXCG_isKeyReleased(KeyCode code)
+bool FXCG_isKeyReleased(FXCG_TKeyCode code)
 {
-    return fxIsKeyHold(code, _key.released);
+    return FXCG_isKeyHold(code, _key.released);
 }

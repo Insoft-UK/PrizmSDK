@@ -20,12 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "draw.h"
-
-#include <fxcg/display.h>
+#include "graphics.h"
+#include <stdbool.h>
 
 // Global variable to track the state of half opacity drawing.
 static bool is_half_opacity_enabled = false;
+
 
 void FXCG_enableHalfOpacityDrawing()
 {
@@ -37,27 +37,18 @@ void FXCG_disableHalfOpacityDrawing()
     is_half_opacity_enabled = false;
 }
 
-void FXCG_clearDisplay(FXCG_Color color)
+void FXCG_clearDisplay(color_t color)
 {
-    FXCG_Color *VRAM = (FXCG_Color *)GetVRAMAddress();
+    color_t *VRAM = (color_t *)GetVRAMAddress();
     int length = 82944;
     while(length--){
         *VRAM++ = color;
     }
 }
 
-FXCG_Color FXCG_color(uint8_t r, uint8_t g, uint8_t b)
+color_t FXCG_color(uint8_t r, uint8_t g, uint8_t b)
 {
-    FXCG_Color color, channel;
-    
-    channel = (FXCG_Color)((float)r / 255.0 * 31.0);
-    color = channel;
-    channel = (FXCG_Color)((float)g / 255.0 * 63.0);
-    color = color * 64 + channel;
-    channel = (FXCG_Color)((float)b / 255.0 * 31.0);
-    color = color * 32 + channel;
-    
-    return color;
+    return (r / 8) << 11 | (g / 4) << 6 | (b / 8);
 }
 
 color_t FXCG_gray(int shade)
@@ -72,11 +63,10 @@ color_t FXCG_gray(int shade)
  @param    w   Width in pixels
  @param    color Specifies what color the plotted pixel will be. It is in RGB 565 format.
  */
-static void FXCG_drawFastHLine(unsigned x, unsigned y, unsigned w, FXCG_TColor color)
+static void FXCG_drawFastHLine(unsigned x, unsigned y, unsigned w, color_t color)
 {
     if (y > 215) return;
-    FXCG_TColor *VRAM = (FXCG_TColor *)GetVRAMAddress();
-    unsigned opacity = y & 1;
+    color_t *VRAM = (color_t *)GetVRAMAddress();
     while (w--) {
         VRAM[x + y * 384] = color;
         if (++x > 383) return;
@@ -90,10 +80,10 @@ static void FXCG_drawFastHLine(unsigned x, unsigned y, unsigned w, FXCG_TColor c
  @param    h   Height in pixels
  @param    color Specifies what color the plotted pixel will be. It is in RGB 565 format.
  */
-static void FXCG_drawFastVLine(unsigned x, unsigned y, unsigned h, uint16_t color)
+static void FXCG_drawFastVLine(unsigned x, unsigned y, unsigned h, color_t color)
 {
     if (x > 383) return;
-    FXCG_TColor *VRAM = (FXCG_TColor *)GetVRAMAddress();
+    color_t *VRAM = (color_t *)GetVRAMAddress();
     while (h--) {
         VRAM[x + y * 384] = color;
         if (++y > 215) return;
@@ -109,7 +99,7 @@ static void swap(int *x, int *y) {
 }
 
 
-void FXCG_drawLine(int x1, int y1, int x2, int y2, FXCG_TColor color)
+void FXCG_drawLine(int x1, int y1, int x2, int y2, color_t color)
 {
     if (x1 == x2) {
         if (y1 > y2)
@@ -119,8 +109,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, FXCG_TColor color)
             return;
         }
         for (; y1 < y2; y1++)
-            pixel(x1, y1, color);
-        
+            FXCG_drawPixel(x1, y1, color);
         return;
     }
     
@@ -132,7 +121,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, FXCG_TColor color)
             return;
         }
         for (; x1 < x2; x1++)
-            pixel(x1, y1, color);
+            FXCG_drawPixel(x1, y1, color);
         
         return;
     }
@@ -160,7 +149,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, FXCG_TColor color)
         delta_y = y1 - y2;
     }
     
-    pixel(x1, y1, color);
+    FXCG_drawPixel(x1, y1, color);
     if (delta_x >= delta_y) {
         int error = delta_y - (delta_x >> 1);        // error may go below zero
         while (x1 != x2) {
@@ -172,7 +161,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, FXCG_TColor color)
             }                              // else do nothing
             x1 += ix;
             error += delta_y;
-            pixel(x1, y1, color);
+            FXCG_drawPixel(x1, y1, color);
         }
     } else {
         int error = delta_x - (delta_y >> 1);      // error may go below zero
@@ -185,12 +174,12 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, FXCG_TColor color)
             }                              // else do nothing
             y1 += iy;
             error += delta_x;
-            pixel(x1, y1, color);
+            FXCG_drawPixel(x1, y1, color);
         }
     }
 }
 
-void FXCG_drawRect(int x, int y, short w, short h, FXCG_TColor color)
+void FXCG_drawRect(int x, int y, short w, short h, color_t color)
 {
     FXCG_drawFastHLine(x, y, w, color);
     FXCG_drawFastHLine(x, y + h - 1, w, color);
@@ -206,7 +195,7 @@ void FXCG_drawRect(int x, int y, short w, short h, FXCG_TColor color)
  @param    cornername  Mask bit #1 or bit #2 to indicate which quarters of the circle we're doing.
  @param    color Specifies what color to draw with. It is in RGB 565 format.
  */
-static void FXCG_drawCircleHelper(int x, int y, short r, uint8_t cornername, FXCG_TColor color)
+static void FXCG_drawCircleHelper(int x, int y, short r, uint8_t cornername, color_t color)
 {
     short f = 1 - r;
     short ddF_x = 1;
@@ -242,7 +231,7 @@ static void FXCG_drawCircleHelper(int x, int y, short r, uint8_t cornername, FXC
     }
 }
 
-void FXCG_drawCircle(int x, int y, short r, FXCG_TColor color)
+void FXCG_drawCircle(int x, int y, short r, color_t color)
 {
     short f = 1 - r;
     short ddF_x = 1;
@@ -285,7 +274,7 @@ void FXCG_drawCircle(int x, int y, short r, FXCG_TColor color)
  @param    delta    Offset from center-point, used for round-rects.
  @param    color Specifies what color to draw with. It is in RGB 565 format.
  */
-static void FXCG_fillCircleHelper(int x, int y, short r, uint8_t corners, short delta, FXCG_TColor color)
+static void FXCG_drawFillCircleHelper(int x, int y, short r, uint8_t corners, short delta, color_t color)
 {
     short f = 1 - r;
     short ddF_x = 1;
@@ -326,102 +315,99 @@ static void FXCG_fillCircleHelper(int x, int y, short r, uint8_t corners, short 
 }
 
 
-void FXCG_drawFillCircle(int x, int y, short r, FXCG_TColor color)
+void FXCG_drawFillCircle(int x, int y, short r, color_t color)
 {
     
     FXCG_drawFastVLine(x, y - r, 2 * r + 1, color);
-    FXCG_fillCircleHelper(x, y, r, 3, 0, color);
+    FXCG_drawFillCircleHelper(x, y, r, 3, 0, color);
     
 }
 
 
-void FXCG_drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, FXCG_TColor color)
+void FXCG_drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, color_t color)
 {
     FXCG_drawLine(x1, y1, x2, y2, color);
     FXCG_drawLine(x2, y2, x3, y3, color);
     FXCG_drawLine(x3, y3, x1, y1, color);
 }
 
-
-void FXCG_drawFillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, FXCG_TColor color)
+void FXCG_drawFillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, color_t color)
 {
-    
-    int a, b, y, last;
-    
-    // Sort coordinates by Y order (y3 >= y2 >= y1)
-    if (y1 > y2) {
-        swap(&y1, &y2);
-        swap(&x1, &x2);
-    }
-    if (y2 > y3) {
-        swap(&y3, &y2);
-        swap(&x3, &x2);
-    }
-    if (y1 > y2) {
-        swap(&y1, &y2);
-        swap(&x1, &x2);
-    }
-    
-    if (y1 == y3) { // Handle awkward all-on-same-line case as its own thing
-        a = b = x1;
-        if (x2 < a)
-            a = x2;
-        else if (x2 > b)
-            b = x2;
-        if (x3 < a)
-            a = x3;
-        else if (x3 > b)
-            b = x3;
-        FXCG_drawFastHLine(a, y1, b - a + 1, color);
-        return;
-    }
-    
-    int dx01 = x2 - x1, dy01 = y2 - y1, dx02 = x3 - x1, dy02 = y3 - y1, dx12 = x3 - x2, dy12 = y3 - y2;
-    int sa = 0, sb = 0;
-    
-    /*
-     For upper part of triangle, find scanline crossings for segments
-     0-1 and 0-2.  If y2=y3 (flat-bottomed triangle), the scanline y2
-     is included here (and second loop will be skipped, avoiding a /0
-     error there), otherwise scanline y2 is skipped here and handled
-     in the second loop...which also avoids a /0 error here if y1=y2
-     (flat-topped triangle).
-     */
-    
-    if (y2 == y3)
-        last = y2; // Include y2 scanline
-    else
-        last = y2 - 1; // Skip it
-    
-    for (y = y1; y <= last; y++) {
-        a = x1 + sa / dy01;
-        b = x1 + sb / dy02;
-        sa += dx01;
-        sb += dx02;
-        
-        if (a > b)
-            swap(&a, &b);
-        FXCG_drawFastHLine(a, y, b - a + 1, color);
-    }
-    
-    // For lower part of triangle, find scanline crossings for segments
-    // 0-2 and 1-2.  This loop is skipped if y2=y3.
-    sa = dx12 * (y - y2);
-    sb = dx02 * (y - y1);
-    for (; y <= y3; y++) {
-        a = x2 + sa / dy12;
-        b = x1 + sb / dy02;
-        sa += dx12;
-        sb += dx02;
-        
-        if (a > b)
-            swap(&a, &b);
-        FXCG_drawFastHLine(a, y, b - a + 1, color);
-    }
+//    int a, b, y, last;
+//    
+//    // Sort coordinates by Y order (y3 >= y2 >= y1)
+//    if (y1 > y2) {
+//        swap(&y1, &y2);
+//        swap(&x1, &x2);
+//    }
+//    if (y2 > y3) {
+//        swap(&y3, &y2);
+//        swap(&x3, &x2);
+//    }
+//    if (y1 > y2) {
+//        swap(&y1, &y2);
+//        swap(&x1, &x2);
+//    }
+//    
+//    if (y1 == y3) { // Handle awkward all-on-same-line case as its own thing
+//        a = b = x1;
+//        if (x2 < a)
+//            a = x2;
+//        else if (x2 > b)
+//            b = x2;
+//        if (x3 < a)
+//            a = x3;
+//        else if (x3 > b)
+//            b = x3;
+//        FXCG_drawFastHLine(a, y1, b - a + 1, color);
+//        return;
+//    }
+//    
+//    int dx01 = x2 - x1, dy01 = y2 - y1, dx02 = x3 - x1, dy02 = y3 - y1, dx12 = x3 - x2, dy12 = y3 - y2;
+//    int sa = 0, sb = 0;
+//    
+//    /*
+//     For upper part of triangle, find scanline crossings for segments
+//     0-1 and 0-2.  If y2=y3 (flat-bottomed triangle), the scanline y2
+//     is included here (and second loop will be skipped, avoiding a /0
+//     error there), otherwise scanline y2 is skipped here and handled
+//     in the second loop...which also avoids a /0 error here if y1=y2
+//     (flat-topped triangle).
+//     */
+//    
+//    if (y2 == y3)
+//        last = y2; // Include y2 scanline
+//    else
+//        last = y2 - 1; // Skip it
+//    
+//    for (y = y1; y <= last; y++) {
+//        a = x1 + sa / dy01;
+//        b = x1 + sb / dy02;
+//        sa += dx01;
+//        sb += dx02;
+//        
+//        if (a > b)
+//            swap(&a, &b);
+//        FXCG_drawFastHLine(a, y, b - a + 1, color);
+//    }
+//    
+//    // For lower part of triangle, find scanline crossings for segments
+//    // 0-2 and 1-2.  This loop is skipped if y2=y3.
+//    sa = dx12 * (y - y2);
+//    sb = dx02 * (y - y1);
+//    for (; y <= y3; y++) {
+//        a = x2 + sa / dy12;
+//        b = x1 + sb / dy02;
+//        sa += dx12;
+//        sb += dx02;
+//        
+//        if (a > b)
+//            swap(&a, &b);
+//        FXCG_drawFastHLine(a, y, b - a + 1, color);
+//    }
 }
 
-
-void FXCG_drawRoundRect(int x, int y, int w, int h, short r, FXCG_TColor color)
+void FXCG_drawRoundRect(int x, int y, int w, int h, short r, color_t color)
 {
     int max_radius = ((w < h) ? w : h) / 2; // 1/2 minor axis
     if (r > max_radius)
@@ -448,26 +434,25 @@ void FXCG_drawRoundRect(int x, int y, int w, int h, short r, FXCG_TColor color)
  @param    r   Radius of corner rounding
  @param    color Specifies what color to draw with. It is in RGB 565 format.
  */
-void FXCG_drawFillRoundRect(int x, int y, int w, int h, short r, FXCG_TColor color)
+void FXCG_drawFillRoundRect(int x, int y, int w, int h, short r, color_t color)
 {
     int max_radius = ((w < h) ? w : h) / 2; // 1/2 minor axis
     if (r > max_radius)
         r = max_radius;
   
-    fillArea(x + r, y, w - 2 * r, h, color);
+    FXCG_drawFillArea(x + r, y, w - 2 * r, h, color);
     FXCG_drawFillCircleHelper(x + w - r - 1, y + r, r, 1, h - 2 * r - 1, color);
     FXCG_drawFillCircleHelper(x + r, y + r, r, 2, h - 2 * r - 1, color);
 }
 
 
-void FXCG_fillArea(unsigned x, unsigned y, unsigned w, unsigned h, FXCG_TColor color)
+void FXCG_drawFillArea(unsigned x, unsigned y, unsigned w, unsigned h, color_t color)
 {
     if (x > 383 || y > 215) return;
-    uint16_t *VRAM = (uint16_t*)GetVRAMAddress();
     while(h--){
         unsigned w2 = w;
         while(w2--) {
-            pixel(x++, y, color);
+            FXCG_drawPixel(x++, y, color);
         }
         x -= w;
         y += 1;
@@ -475,7 +460,7 @@ void FXCG_fillArea(unsigned x, unsigned y, unsigned w, unsigned h, FXCG_TColor c
 }
 
 
-void FXCG_drawPixel(int x, int y, FXCG_TColor color)
+void FXCG_drawPixel(int x, int y, color_t color)
 {
     if (x < 0 || y < 0) return;
     if (x > 383 || y > 215) return;
@@ -501,7 +486,7 @@ void FXCG_drawImage(uint16_t* data, int x, int y, int w, int h)
 }
 
 
-void FXCG_drawImageMaskedAlpha(uint16_t* data, int x, int y, int w, int h, FXCG_TColor maskColor, int alpha)
+void FXCG_drawImageMaskedAlpha(uint16_t* data, int x, int y, int w, int h, color_t maskColor, int alpha)
 {
     uint16_t* VRAM = (uint16_t*)GetVRAMAddress();
     VRAM += LCD_WIDTH_PX*y + x;
@@ -521,9 +506,9 @@ void FXCG_drawImageMaskedAlpha(uint16_t* data, int x, int y, int w, int h, FXCG_
 }
 
 
-void FXCG_drawImageNbit(const uint8_t* data, int x, int y, int w, int h, FXCG_TColor* palette, unsigned int bitWidth)
+void FXCG_drawImageNbit(const uint8_t* data, int x, int y, int w, int h, color_t* palette, unsigned int bitWidth)
 {
-    FXCG_TColor* VRAM = (FXCG_TColor*) GetVRAMAddress();
+    color_t* VRAM = (color_t*) GetVRAMAddress();
     VRAM += (LCD_WIDTH_PX*y + x);
     int offset = 0;
     uint8_t buf = 0;
@@ -545,9 +530,9 @@ void FXCG_drawImageNbit(const uint8_t* data, int x, int y, int w, int h, FXCG_TC
 }
 
 
-void FXCG_drawImageNbitMasked(const uint8_t *data, int x, int y, int w, int h, const FXCG_TColor* palette, FXCG_TColor maskColor, unsigned int bitWidth)
+void FXCG_drawImageNbitMasked(const uint8_t *data, int x, int y, int w, int h, const color_t* palette, color_t maskColor, unsigned int bitWidth)
 {
-    FXCG_TColor* VRAM = (FXCG_TColor*) GetVRAMAddress();
+    color_t* VRAM = (color_t*) GetVRAMAddress();
     VRAM += (LCD_WIDTH_PX*y + x);
     int offset = 0;
     uint8_t buf = 0;
@@ -570,5 +555,6 @@ void FXCG_drawImageNbitMasked(const uint8_t *data, int x, int y, int w, int h, c
         VRAM += (LCD_WIDTH_PX - w);
     }
 }
+
 
 

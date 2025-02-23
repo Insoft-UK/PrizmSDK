@@ -8,7 +8,7 @@
         <line choice="default"/>
     </choices-outline>
     <choice id="default" title="Install PrizmSDK">
-        <pkg-ref id="uk.insoft.prizmsdk"/>
+        <pkg-ref id="uk.insoft.PrizmSDK"/>
     </choice>
-    <pkg-ref id="uk.insoft.prizmsdk" installKBytes="148484" version="1.0" onConclusion="none">primesdk.pkg</pkg-ref>
+    <pkg-ref id="uk.insoft.PrizmSDK" installKBytes="148452" version="1.0" onConclusion="none">PrizmSDK-signed.pkg</pkg-ref>
 </installer-gui-script>
