@@ -22,7 +22,7 @@ ifndef SOURCES
 	SOURCES := src
 endif
 
-ADDITIONAL_SOURCE := $(HOME)/Documents/Prizm/Libraries/fxCG
+ADDITIONAL_SOURCE := src/fxCG
 SOURCES += $(ADDITIONAL_SOURCE)
 
 DATA		:=	data
@@ -30,7 +30,7 @@ ifndef INCLUDES
 	INCLUDES :=
 endif
 
-ADDITIONAL_INCLUDES := $(HOME)/Documents/Prizm/Libraries/fxCG
+ADDITIONAL_INCLUDES := src/fxCG
 INCLUDES += $(ADDITIONAL_INCLUDES)
 
 #---------------------------------------------------------------------------------
