@@ -61,11 +61,10 @@ if [ ! -d "/opt/homebrew" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-brew install cmake gmp mpfr libmpc isl wget make gcc imagemagick
+brew install libpng cmake gmp mpfr libmpc isl wget make gcc imagemagick
 
 
 mkdir -p ~/sh3eb-toolchain
-cp prizm_rules ~/sh3eb-toolchain/prizm_rules
 if [ ! -d "~/Document/Prizm" ]; then
     cp -r Prizm ~/Documents
 fi
@@ -143,14 +142,8 @@ make install
 cp lib/*.a /Applications/CASIO/PrizmSDK/lib/
 cp -a toolchain /Applications/CASIO/PrizmSDK/
 cp -a include /Applications/CASIO/PrizmSDK/
-cd ~/sh3eb-toolchain
-cp prizm_rules $LIBFXCG/toolchain
-read -p "Press Enter to continue..."
+cd ~/
 
-export PATH=/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:/Applications/CASIO/PrizmSDK/bin:$PATH
-# Add this line to your ~/.zshrc or ~/.bashrc to make the change permanent.
-
-
-find /Applications/CASIO/PrizmSDK -type f -exec file {} \; | grep Mach-O | cut -d: -f1 | xargs strip > /dev/null 2>&1
 rm ~/sh3eb-toolchain
 
+read -p "Press Enter to exit."
