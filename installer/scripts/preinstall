@@ -28,7 +28,6 @@ CURRENT_USER=$(stat -f%Su /dev/console)
 # Define the target home directory
 USER_HOME="/Users/$CURRENT_USER"
 
-rm -r "$USER_HOME/Documents/Prizm/Projects/Libraries/fxCG"
 rm -r "$USER_HOME/Documents/Prizm/Projects/Example"
 rm -r "$USER_HOME/Documents/Prizm/Projects/Template"
 
