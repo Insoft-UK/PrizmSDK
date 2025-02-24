@@ -2,12 +2,13 @@
 
 This document will walk you through the process of setting up the <a href="https://github.com/Jonimoose/libfxcg">PrizmSDK</a> and building your first add-in on macOS.
 
-## Download and unpack the PrizmSDK
+## Download PrizmSDK
 
-Download an PrizmSDK package from the [releases page](https://github.com//Insoft-UK/libfxcg/releases/) and unpack to your Applications/CASIO folder.
+Download an PrizmSDK binary for Intel or AppleSilicon from the [releases page](https://github.com//Insoft-UK/libfxcg/releases/) and unpack to your Applications/CASIO folder.
 
 ![Extracted SDK package](img/sdk-dir.png)
 
+Make sure macOS knows the path of the PrizmSDK.
 ```
 export FXCGSDK=/Applications/CASIO/PrizmSDK
 grep -qxF 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' ~/.zshrc || echo 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' >> ~/.zshrc
@@ -15,17 +16,21 @@ grep -qxF 'export FXCGSDK=/Applications/CASIO/PrizmSDK' ~/.zshrc || echo 'export
 source ~/.zshrc
 ```
 
-## Look at the Example project
+>[!NOTE]
+If using the **pre-binary** file, you may require `libpng gmp mpfr libmpc isl imagemagick` are installed.
+`brew install libpng gmp mpfr libmpc isl imagemagick`
+The installer package is for AppleSilicon only.
 
-Navigate to `Projects`, then `Example`. This directory contains the example project to get you started with and looks like this:
+## Example Project
 
-![Example project directory layout](img/project-dir.png)
+Download the Prizm folder from the GitHub Repositories [Prizm](https://github.com/Insoft-UK/PrizmSDK/tree/main/Prizm) and copy to your ~/Documents folder.
+Navigate to `Prizm/Projects`, then `Template`. This directory contains an Xcode project example project to get you started with and looks like this:
+
+![Example Xcode project](img/Xcode.png)
 
 The `Icon~sel.bmp` and `Icon~uns.bmp` images are built into the compiled add-in and are the icons shown in the calculator's menus for the add-in when it is selected with the cursor and unselected, respectively.
 
 `Makefile` is a plain-text file that includes instructions that tell the system how to compile the add-in. You can edit this with any text editor of your choice, but in most cases don't need to (and probably shouldn't unless you know what you're doing). If you're just getting started, it's safe to ignore this file. Similarly, `make` allows you to run a single command and compile the add-in and you shouldn't need to touch it.
-
-![Example project directory layout](img/example-dir.png)
 
 ## Compile the Example project
 
