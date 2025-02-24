@@ -26,6 +26,8 @@
 #include <fxcg/display.h>
 #include "types.h"
 
+#define FXCG_drawPixel Bdisp_SetPoint_VRAM
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -152,14 +154,6 @@ extern "C" {
      @param    color Color of the filled rectangle.
      */
     void FXCG_drawFillArea(unsigned x, unsigned y, unsigned w, unsigned h, color_t color);
-    
-    /**
-     @brief    Draws a signle pixel at (x,y)
-     @param    x   Specifies the x coordinate of the pixel in range of [0,383]
-     @param    y   Specifies the y coordinate of the pixel in range of [0,215]
-     @param    color Specifies what color the plotted pixel will be. It is in RGB 565 format.
-     */
-    void FXCG_drawPixel(int x, int y, uint16_t color);
     
     /**
      @brief    Draw a 16-bit image to the VRAM buffer.

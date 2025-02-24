@@ -34,8 +34,10 @@ int AddIn_main(int argc, const char * argv[]) {
     int key;
     
     Bdisp_AllClr_VRAM();
-    Print_OS("Press EXE to exit", 0, 0);
+    Bdisp_EnableColor(1);
+    EnableStatusArea(0);
     
+    Print_OS("Press EXE to exit", 0, 0);
 
     while (1) {
         GetKey(&key);
@@ -44,6 +46,7 @@ int AddIn_main(int argc, const char * argv[]) {
             break;
         }
         
+        Bdisp_PutDisp_DD();
         OS_InnerWait_ms(100000);
     }
     

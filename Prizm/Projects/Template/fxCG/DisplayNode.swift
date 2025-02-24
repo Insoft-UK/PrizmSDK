@@ -38,6 +38,8 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
     private var mutableTexture: SKMutableTexture!
     private var display: SKSpriteNode!
     
+    private var battery: SKSpriteNode!
+    
     // MARK: - Private class variables
 
     
@@ -58,13 +60,18 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
         let size = CGSize(width: CGFloat(396), height: CGFloat(224))
         
         display = SKSpriteNode(color: .clear, size: size)
-        display.yScale = -1
+//        display.yScale = -1
         addChild(display)
 
         mutableTexture = SKMutableTexture(size: display.size)
         display.texture = mutableTexture
         display.blendMode = .replace
         zPosition = 1
+        
+        battery = SKSpriteNode(imageNamed: "Bat25%")
+        battery.anchorPoint = .zero
+        battery.position = CGPoint(x: 198 - battery.size.width - 6, y: 112 - battery.size.height)
+        display.addChild(battery)
     }
     
     
@@ -84,7 +91,7 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
                     let g = UInt8(((rgb565 >> 5)  & 0x3F) * 255 / 63)  // 6-bit Green to 8-bit
                     let b = UInt8((rgb565 & 0x1F) * 255 / 31)         // 5-bit Blue to 8-bit
                     
-                    pixelBuffer[y * 396 + x] = UInt32(r) | (UInt32(g) << 8) | (UInt32(b) << 16) | 0xFF000000
+                    pixelBuffer[(223 - y) * 396 + x] = UInt32(r) | (UInt32(g) << 8) | (UInt32(b) << 16) | 0xFF000000
                 }
             }
         }

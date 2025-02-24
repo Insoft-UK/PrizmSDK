@@ -459,20 +459,6 @@ void FXCG_drawFillArea(unsigned x, unsigned y, unsigned w, unsigned h, color_t c
     }
 }
 
-
-void FXCG_drawPixel(int x, int y, color_t color)
-{
-    if (x < 0 || y < 0) return;
-    if (x > 383 || y > 215) return;
-    uint16_t *VRAM = (uint16_t *)GetVRAMAddress();
-    if (is_half_opacity_enabled == true) {
-        if (x & 1 && y & 1) return;
-        if (!(x & 1) && !(y & 1)) return;
-    }
-    VRAM[x + y * 384] = color;
-}
-
-
 void FXCG_drawImage(uint16_t* data, int x, int y, int w, int h)
 {
     uint16_t *VRAM = (uint16_t*)GetVRAMAddress();

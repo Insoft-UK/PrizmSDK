@@ -42,15 +42,15 @@ static struct {
 
 int _fxCG_StatusArea = 1;
 static unsigned short _fxCG_SAF = SAF_BATTERY | SAF_ALPHA_SHIFT;
+static char _fxCG_StatusArea_ColorA = TEXT_COLOR_WHITE, _fxCG_StatusArea_ColorB = TEXT_COLOR_WHITE;
 
 // DRAM is RGB565 regardless of VRAM RGB565 or RGB111
 static color_t _DRAM[396 * 224];
 static color_t _VRAM[LCD_WIDTH_PX * LCD_HEIGHT_PX];
 static color_t _SecondaryVRAM[LCD_WIDTH_PX * LCD_HEIGHT_PX];
 
-static color_t _FrameColor = 0xFFFF;
 static unsigned short _fxCG_0xFD801460 = 0xFFFF;
-static int _FrameMode = 0;
+static int _fxCG_FrameMode = 0;
 
 
 // MARK: -
@@ -298,7 +298,36 @@ static int fxCG_Range(int min, int max, int value) {
     return value;
 }
 
-// MARK: -fxcg
+color_t convertTextColorToRGB565(char ink)
+{
+    
+    switch (ink) {
+        case 1:
+            return 0x001F;
+            
+        case 2:
+            return 0x07E0;
+            
+        case 3:
+            return 0x07FF;
+            
+        case 4:
+            return 0xF800;
+            
+        case 5:
+            return 0xF81F;
+            
+        case 6:
+            return 0xFFE0;
+            
+        case 7:
+            return 0xFFFF;
+    }
+    
+    return 0xFFFF;
+}
+
+// MARK: - fxcg
 
 void Bdisp_AreaClr(struct display_fill *area, unsigned char target, color_t color)
 {
@@ -336,12 +365,18 @@ void DrawFrame(int color)
 
 color_t FrameColor(int mode, color_t color)
 {
-    if (mode == 0) {
-        _fxCG_0xFD801460 = color;
+    switch (mode) {
+        case 0:
+            _fxCG_0xFD801460 = 0xFFFF;
+            break;
+            
+        case 1:
+            _fxCG_0xFD801460 = color;
+            
+        default:
+            break;
     }
-    else {
-        _fxCG_0xFD801460 = 0xFFFF;
-    }
+    
     return _fxCG_0xFD801460;
 }
 
@@ -357,10 +392,10 @@ void* GetSecondaryVRAMAddress(void)
 
 void Bdisp_AllClr_VRAM(void)
 {
-    memset(_VRAM, 255, LCD_WIDTH_PX * LCD_HEIGHT_PX * sizeof(color_t));
+    memset(_VRAM, 255, sizeof(_VRAM));
 }
 
-void Bdisp_SetPoint_VRAM( int x, int y, int color ) {
+void Bdisp_SetPoint_VRAM( int x, int y, color_t color ) {
     if (x < 0 || x >= LCD_WIDTH_PX || y < 0 || y >= LCD_HEIGHT_PX) return;
     
     unsigned short *VRAM = (unsigned short *)GetVRAMAddress();
@@ -397,7 +432,7 @@ void Bdisp_SetPoint_VRAM( int x, int y, int color ) {
         }
     }
     
-    VRAM[x + y * LCD_WIDTH_PX] = (unsigned short)color;
+    VRAM[x + y * LCD_WIDTH_PX] = color;
 }
 
 color_t Bdisp_GetPoint_VRAM( int x, int y )
@@ -411,8 +446,9 @@ color_t Bdisp_GetPoint_VRAM( int x, int y )
 }
 
 void SaveVRAM_1(void) {
-    unsigned short *dest = (unsigned short *)GetSecondaryVRAMAddress();
     unsigned short *src = (unsigned short *)_VRAM;
+    unsigned short *dest = (unsigned short *)GetSecondaryVRAMAddress();
+    
     size_t length = LCD_WIDTH_PX * LCD_HEIGHT_PX;
     do {
         *dest++ = *src++;
@@ -422,6 +458,7 @@ void SaveVRAM_1(void) {
 void LoadVRAM_1(void) {
     unsigned short *src = (unsigned short *)GetSecondaryVRAMAddress();
     unsigned short *dest = (unsigned short *)_VRAM;
+    
     size_t length = LCD_WIDTH_PX * LCD_HEIGHT_PX;
     do {
         *dest++ = *src++;
@@ -439,40 +476,138 @@ void Bdisp_Fill_VRAM(int color, int mode)
     }
 }
 
-void Bdisp_PutDisp_DD(void) {
-    unsigned short color;
-
-
-    int y = _fxCG_StatusArea ? 22 : 0;
+void Bdisp_Rectangle(int x1, int y1, int x2, int y2, char color)
+{
+    if (x1 < 0) x1 = 0;
+    if (y1 < 0) y1 = 0;
+    if (x2 > 383) x2 = 383;
+    if (y2 > 191) y2 = 191;
     
-    for (; y < LCD_HEIGHT_PX; y++) {
+    if (x1 >= x2 || y1 >= y2) return;
+    
+    y1 += 24;
+    y2 += 24;
+    
+    int w = x2 - x1 + 1;
+    int h = y2 - y1 + 1;
+
+    unsigned short rgb565 = 0;
+    
+    switch (color) {
+        case 1:
+            rgb565 = 0x001F;
+            break;
+            
+        case 2:
+            rgb565 = 0x07E0;
+            break;
+            
+        case 3:
+            rgb565 = 0x07FF;
+            break;
+            
+        case 4:
+            rgb565 = 0xF800;
+            break;
+            
+        case 5:
+            rgb565 = 0xF81F;
+            break;
+            
+        case 6:
+            rgb565 = 0xFFE0;
+            break;
+            
+        case 7:
+            rgb565 = 0xFFFF;
+            break;
+    }
+    
+    
+    while(h--){
+        unsigned w2 = w;
+        while(w2--) {
+            _VRAM[x1 + y1 * LCD_WIDTH_PX] = rgb565;
+        }
+        x1 -= w;
+        y1 += 1;
+    }
+}
+
+// MARK: - DD Display Manipulating Syscalls:
+
+void Bdisp_PutDisp_DD(void) {
+    DisplayStatusArea();
+    
+    for (int y = 0; y < 240; y++) {
+        for (int x = 0; x < 396; x++) {
+            if (y >= LCD_HEIGHT_PX || (x < 6 || x >= 390)) {
+                _DRAM[x + y * 396] = _fxCG_0xFD801460;
+                continue;
+            }
+            _DRAM[x + y * 396] = _VRAM[x - 6 + y * 384];
+        }
+    }
+}
+
+
+void Bdisp_PutDisp_DD_stripe(int y1, int y2)
+{
+    unsigned short color;
+    
+    for (int y = y1; y <= y2; y++) {
         for (int x = 0; x < LCD_WIDTH_PX; x++) {
             color = Bdisp_GetPoint_VRAM(x, y);
             Bdisp_SetPoint_DD(6 + x, y, color);
         }
     }
-    
-    if (!_fxCG_StatusArea) return;
-    
-    DisplayStatusArea();
 }
 
 void Bdisp_SetPoint_DD( int x, int y, int color ) {
-    if (x < 0 || x >= LCD_WIDTH_PX + 12 || y < 0 || y >= LCD_HEIGHT_PX + 8) return;
-    _DRAM[x + y * 396] = (unsigned short)color;
+    if (x < 0 || x >= LCD_WIDTH_PX || y < 0 || y >= LCD_HEIGHT_PX) return;
+    _DRAM[6 + x + y * 396] = (unsigned short)color;
 }
 
-// MARK: -Cursor manipulating syscalls:
-
-void locate_OS( int x, int y )
+unsigned short Bdisp_GetPoint_DD_Workbench(int x, int y)
 {
-    if (x < 1 || x > 21) return;
-    if (y < 1 || y > 8) return;
+    return Bdisp_GetPoint_DD(x, y + 24);
+}
+unsigned short Bdisp_GetPoint_DD(int x, int y)
+{
+    if (x < 0 || x >= LCD_WIDTH_PX || y < 0 || y >= LCD_HEIGHT_PX) return 0;
+    return _DRAM[6 + x + y * 396];
+}
+void DirectDrawRectangle( int x1, int y1, int x2, int y2, unsigned short color )
+{
+    if (x1 < 0) x1 = 0;
+    if (y1 < 0) y1 = 0;
+    if (x2 > 395) x2 = 395;
+    if (y2 > 223) y2 = 223;
+    
+    if (x1 >= x2 || y1 >= y2) return;
+    
+    for (int y = y1; y <= y2; y++) {
+        for (int x = x1; x <= x2; x++) {
+            _DRAM[x + y * 396] = color;
+        }
+    }
+}
+
+// MARK: - Cursor manipulating syscalls:
+
+int locate_OS( int x, int y )
+{
+    if (x < 1 || x > 21) return 0;
+    if (y < 1 || y > 8) return 0;
     _fxCG_Cursor.x = x;
     _fxCG_Cursor.y = y;
+    
+    return 1;
 }
 
-// MARK: -Character printing syscalls:
+
+
+// MARK: - Character printing syscalls:
 
 void PrintXY( int x, int y, const char *string, int mode, int color ) {
     
@@ -580,19 +715,65 @@ void Bdisp_MMPrint(int x, int y, unsigned char *s, int mode, int xmax, int P6, i
     DrawText(x, y + 24, (const char*)s, color, FontSize16pt);
 }
 
-// MARK: -Status area/header related syscalls:
+// MARK: - Status area/header related syscalls:
+
+int DefineStatusAreaFlags( int mode, int flags, char *color1, char *color2 )
+{
+    
+    switch (mode) {
+        case 0:
+            _fxCG_SAF = 0;
+            break;
+            
+        case 1:
+            _fxCG_SAF = 0x303;
+            break;
+            
+        case 2:
+            if (*color1) *color1 = _fxCG_StatusArea_ColorA;
+            if (*color2) *color2 = _fxCG_StatusArea_ColorB;
+            break;
+            
+        case 3:
+            if (*color1) _fxCG_StatusArea_ColorA = *color1;
+            if (*color2) _fxCG_StatusArea_ColorB = *color2;
+            _fxCG_SAF = flags;
+            break;
+            
+        case 4:
+            _fxCG_SAF |= flags;
+            break;
+            
+        case 5:
+            _fxCG_SAF &= ~flags;
+            break;
+            
+        default:
+            break;
+    }
+    
+    return 0;
+}
 
 void DisplayStatusArea(void)
 {
     if (_fxCG_StatusArea == 0) return;
+
     
-    color_t* VRAM = (color_t *)GetVRAMAddress();
-    for (int y = 0; y < 24; y++)
+    for (int y = 0; y <= 22; y++)
     {
         for (int x = 0; x < LCD_WIDTH_PX; x++)
         {
-            _VRAM[6 + x + y * 396] = VRAM[x + y * LCD_WIDTH_PX];
+            if (y & 1) {
+                _VRAM[x + y * LCD_WIDTH_PX] = (x & 1) ? convertTextColorToRGB565(_fxCG_StatusArea_ColorA) : convertTextColorToRGB565(_fxCG_StatusArea_ColorB);
+            } else {
+                _VRAM[x + y * LCD_WIDTH_PX] = (x & 1) ? convertTextColorToRGB565(_fxCG_StatusArea_ColorB) : convertTextColorToRGB565(_fxCG_StatusArea_ColorA);
+            }
         }
+    }
+    
+    for (int x = 0; x < LCD_WIDTH_PX; x++) {
+        _VRAM[x + 23 * LCD_WIDTH_PX] = 0;
     }
     
     if (_fxCG_SAF & SAF_BATTERY)
@@ -612,6 +793,11 @@ void DisplayStatusArea(void)
             }
         }
     }
+}
+
+void BatteryIcon( unsigned int p1)
+{
+    
 }
 
 void EnableStatusArea(int opt)
