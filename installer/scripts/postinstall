@@ -26,26 +26,4 @@ grep -qxF 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK
 grep -qxF 'export FXCGSDK=/Applications/CASIO/PrizmSDK' ~/.zshrc || echo 'export FXCGSDK=/Applications/CASIO/PrizmSDK' >> ~/.zshrc
 source ~/.zshrc
 
-# Detect the currently logged-in user (excluding root)
-CURRENT_USER=$(stat -f%Su /dev/console)
-
-# Define the target home directory
-USER_HOME="/Users/$CURRENT_USER"
-
-echo "Installing files to $USER_HOME"
-
-if [ ! -d "$USER_HOME/Documents/Prizm" ]; then
-    mv /Users/Shared/Prizm "$USER_HOME/Documents"
-else
-    mv /Users/Shared/Prizm/Projects/Template "$USER_HOME/Documents/Prizm/Projects"
-    mv /Users/Shared/Prizm/Projects/Example "$USER_HOME/Documents/Prizm/Projects"
-fi
-
-rm -r /Users/Shared/Prizm
-    
-# Set correct ownership (important!)
-chown -R "$CURRENT_USER" "$USER_HOME/Documents/Prizm"
-chgrp -R staff "$USER_HOME/Documents/Prizm"
-echo "Installation to $USER_HOME completed successfully."
-
 exit 0
