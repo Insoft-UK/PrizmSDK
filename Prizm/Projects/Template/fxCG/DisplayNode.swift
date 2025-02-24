@@ -23,8 +23,8 @@
 
 import SpriteKit
 
-@_silgen_name("GetVRAMAddress")
-func GetVRAMAddress() -> UnsafeMutableRawPointer?
+@_silgen_name("GetDRAMAddress")
+func GetDRAMAddress() -> UnsafeMutableRawPointer?
 
 @_silgen_name("FrameColor")
 func FrameColor(mode: Int, color: UInt16) -> UInt16?
@@ -70,7 +70,7 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
     
     @objc func redraw() {
         mutableTexture.modifyPixelData { pixelData, lengthInBytes in
-            guard let vramPointer = GetVRAMAddress()?.assumingMemoryBound(to: UInt16.self),
+            guard let dramPointer = GetDRAMAddress()?.assumingMemoryBound(to: UInt16.self),
                   let pixelBuffer = pixelData?.assumingMemoryBound(to: UInt32.self) else {
                 return
             }
@@ -78,20 +78,13 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
             // Iterate through the VRAM and convert each pixel
             for y in 0..<224 {
                 for x in 0..<396 {
-                    let index: Int = (y * 396 + x)
-                    
-                    if ((x < 6 || x >= 390) || y >= 216) {
-                        pixelBuffer[index] = 0xFFFFFFFF
-                        continue
-                    }
-                    
-                    let rgb565 = vramPointer[y * 384 + x - 6]
+                    let rgb565 = dramPointer[y * 396 + x]
                     
                     let r = UInt8(((rgb565 >> 11) & 0x1F) * 255 / 31)  // 5-bit Red to 8-bit
                     let g = UInt8(((rgb565 >> 5)  & 0x3F) * 255 / 63)  // 6-bit Green to 8-bit
                     let b = UInt8((rgb565 & 0x1F) * 255 / 31)         // 5-bit Blue to 8-bit
                     
-                    pixelBuffer[index] = (UInt32(r) << 24) | (UInt32(g) << 16) | (UInt32(b) << 8) | 0xFF
+                    pixelBuffer[y * 396 + x] = UInt32(r) | (UInt32(g) << 8) | (UInt32(b) << 16) | 0xFF000000
                 }
             }
         }

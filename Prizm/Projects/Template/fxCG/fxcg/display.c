@@ -79,6 +79,11 @@ typedef enum FontSize{
     FontSize10pt
 } TFontSize;
 
+void *GetDRAMAddress(void)
+{
+    return _DRAM;
+}
+
 #include "CASIO/fxCG50_10pt0xXX.h"
 #include "CASIO/fxCG50_10pt0x7FXX.h"
 #include "CASIO/fxCG50_10pt0xE5XX.h"
@@ -292,7 +297,8 @@ static int fxCG_Range(int min, int max, int value) {
     if (value > max) return max;
     return value;
 }
-//
+
+// MARK: -fxcg
 
 void Bdisp_AreaClr(struct display_fill *area, unsigned char target, color_t color)
 {
