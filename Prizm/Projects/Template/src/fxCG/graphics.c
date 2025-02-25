@@ -448,15 +448,10 @@ void FXCG_drawFillRoundRect(int x, int y, int w, int h, short r, color_t color)
 
 void FXCG_drawFillArea(unsigned x, unsigned y, unsigned w, unsigned h, color_t color)
 {
-    if (x > 383 || y > 215) return;
-    while(h--){
-        unsigned w2 = w;
-        while(w2--) {
-            FXCG_drawPixel(x++, y, color);
-        }
-        x -= w;
-        y += 1;
-    }
+    TBdispFillArea area = {
+        .x1 = x, .y1 = y, .x2 = x + w - 1, .y2 = y + h - 1, .mode = AreaModeColor
+    };
+    Bdisp_AreaClr(&area, 0, color);
 }
 
 void FXCG_drawImage(uint16_t* data, int x, int y, int w, int h)

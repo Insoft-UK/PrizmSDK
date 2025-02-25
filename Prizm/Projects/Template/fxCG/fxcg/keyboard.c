@@ -58,6 +58,29 @@ void fxCG_KeyUp(int keyCode) {
 
 // MARK: - Keyboard Functions
 
+int Keyboard_PutKeycode(int x, int y, int keycode)
+{
+    int word = y >> 1;
+    int bit = x + 8 * ( y & 1 );
+    
+    if (keycode)
+        _fxCG_0xA44B0000[word] |= 1 << bit;
+    else
+        _fxCG_0xA44B0000[word] &= ~(1 << bit);
+    
+    return _fxCG_0xA44B0000[word];
+}
+
+int Keyboard_SpyMatrixCode(char *column, char *row)
+{
+    int r = *row;
+    int c = *column;
+    
+    int word = r >> 1;
+    int bit = c + 8 * ( r & 1 );
+    return _fxCG_0xA44B0000[word];
+}
+
 static const unsigned short CC[] = {
     0x7539,   // F1
     0x753A,   // F2
@@ -200,7 +223,7 @@ int GetKey( int *key )
     
     do {
         keycode = PRGM_GetKey();
-        OS_InnerWait_ms(10);
+        OS_InnerWait_ms(1000);
     } while (!keycode);
     
     // CR

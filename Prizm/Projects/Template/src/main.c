@@ -38,16 +38,20 @@ int AddIn_main(int argc, const char * argv[]) {
     EnableStatusArea(0);
     
     Print_OS("Press EXE to exit", 0, 0);
-
+    
+    TBdispFillArea area = {
+        0, 40, 160, 191, AreaModeColor
+    };
+    Bdisp_AreaClr(&area, 0, 0xF800);
+    
     while (1) {
         GetKey(&key);
         
         if (key == KEY_CTRL_EXE) {
             break;
         }
-        
-        Bdisp_PutDisp_DD();
-        OS_InnerWait_ms(100000);
+    
+        OS_InnerWait_ms(1000);
     }
     
     return 0;

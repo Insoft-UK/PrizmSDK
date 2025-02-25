@@ -45,7 +45,7 @@ static unsigned short _fxCG_SAF = SAF_BATTERY | SAF_ALPHA_SHIFT;
 static char _fxCG_StatusArea_ColorA = TEXT_COLOR_WHITE, _fxCG_StatusArea_ColorB = TEXT_COLOR_WHITE;
 
 // DRAM is RGB565 regardless of VRAM RGB565 or RGB111
-static color_t _DRAM[396 * 224];
+static color_t _DD[396 * 224];
 static color_t _VRAM[LCD_WIDTH_PX * LCD_HEIGHT_PX];
 static color_t _SecondaryVRAM[LCD_WIDTH_PX * LCD_HEIGHT_PX];
 
@@ -79,9 +79,9 @@ typedef enum FontSize{
     FontSize10pt
 } TFontSize;
 
-void *GetDRAMAddress(void)
+void *GetDDAddress(void)
 {
-    return _DRAM;
+    return _DD;
 }
 
 #include "CASIO/fxCG50_10pt0xXX.h"
@@ -329,9 +329,9 @@ color_t convertTextColorToRGB565(char ink)
 
 // MARK: - fxcg
 
-void Bdisp_AreaClr(struct display_fill *area, unsigned char target, color_t color)
+void Bdisp_AreaClr(TBdispFillArea *area, TTarget target, color_t color)
 {
-    color_t* VRAM = (color_t *)GetVRAMAddress();
+    if (area->mode == AreaModeWhite) color = 0xFFFF;
     
     for (int y = area->y1; y <= area->y2 && y < LCD_HEIGHT_PX - 1; y++)
     {
@@ -339,14 +339,19 @@ void Bdisp_AreaClr(struct display_fill *area, unsigned char target, color_t colo
         for (int x = area->x1; x <= area->x2 && x < LCD_WIDTH_PX - 1; x++)
         {
             if (x < 0) continue;
-            VRAM[x + y * LCD_WIDTH_PX] = (unsigned short)color;
+            if (x > 384) break;
+            if (target == TargetVRAM) {
+                _VRAM[x + y * 384] = color;
+            } else {
+                _DD[x + 6 + y * 396] = color;
+            }
         }
     }
 }
 
-void Bdisp_EnableColor(int mode)
+void Bdisp_EnableColor(TColorMode mode)
 {
-    _fxCG_DDRegister.B = mode == 1 ? 0 : 1;
+    _fxCG_DDRegister.B = mode == ColorModeFull ? 0 : 1;
 }
 
 void DrawFrame(int color)
@@ -401,35 +406,7 @@ void Bdisp_SetPoint_VRAM( int x, int y, color_t color ) {
     unsigned short *VRAM = (unsigned short *)GetVRAMAddress();
     
     if (_fxCG_DDRegister.B != 0) {
-        switch (color) {
-            case 1:
-                color = 0x001F;
-                break;
-                
-            case 2:
-                color = 0x07E0;
-                break;
-                
-            case 3:
-                color = 0x07FF;
-                break;
-                
-            case 4:
-                color = 0xF800;
-                break;
-                
-            case 5:
-                color = 0xF81F;
-                break;
-                
-            case 6:
-                color = 0xFFE0;
-                break;
-                
-            case 7:
-                color = 0xFFFF;
-                break;
-        }
+        color = convertTextColorToRGB565(color);
     }
     
     VRAM[x + y * LCD_WIDTH_PX] = color;
@@ -469,11 +446,25 @@ void Bdisp_Fill_VRAM(int color, int mode)
 {
     if (mode == 0 || mode > 4) return;
     
-    for (int y = mode == 1 || mode == 2 ? 24 : 0; y < (mode == 2 ? LCD_HEIGHT_PX - 24 : LCD_HEIGHT_PX); y++) {
-        for (int x = 0; x < LCD_WIDTH_PX; x++) {
-            Bdisp_SetPoint_VRAM(x, y, color);
-        }
+    TBdispFillArea fillAria = {
+        0, 0, 383, 215, 1
+    };
+    
+    switch (mode) {
+        case 1:
+            fillAria.y1 += 24;
+            break;
+            
+        case 2:
+            fillAria.y1 += 24;
+            fillAria.y2 -= 20;
+            break;
+            
+        default:
+            break;
     }
+    
+    Bdisp_AreaClr(&fillAria, 0, color);
 }
 
 void Bdisp_Rectangle(int x1, int y1, int x2, int y2, char color)
@@ -488,49 +479,14 @@ void Bdisp_Rectangle(int x1, int y1, int x2, int y2, char color)
     y1 += 24;
     y2 += 24;
     
-    int w = x2 - x1 + 1;
-    int h = y2 - y1 + 1;
-
-    unsigned short rgb565 = 0;
-    
-    switch (color) {
-        case 1:
-            rgb565 = 0x001F;
-            break;
-            
-        case 2:
-            rgb565 = 0x07E0;
-            break;
-            
-        case 3:
-            rgb565 = 0x07FF;
-            break;
-            
-        case 4:
-            rgb565 = 0xF800;
-            break;
-            
-        case 5:
-            rgb565 = 0xF81F;
-            break;
-            
-        case 6:
-            rgb565 = 0xFFE0;
-            break;
-            
-        case 7:
-            rgb565 = 0xFFFF;
-            break;
+    for (int x = x1; x <= x2; x++) {
+        _VRAM[x + y1 * LCD_WIDTH_PX] = convertTextColorToRGB565(color);
+        _VRAM[x + y2 * LCD_WIDTH_PX] = convertTextColorToRGB565(color);
     }
     
-    
-    while(h--){
-        unsigned w2 = w;
-        while(w2--) {
-            _VRAM[x1 + y1 * LCD_WIDTH_PX] = rgb565;
-        }
-        x1 -= w;
-        y1 += 1;
+    for (int y = y1; y <= y2; y++) {
+        _VRAM[x1 + y * LCD_WIDTH_PX] = convertTextColorToRGB565(color);
+        _VRAM[x2 + y * LCD_WIDTH_PX] = convertTextColorToRGB565(color);
     }
 }
 
@@ -542,10 +498,10 @@ void Bdisp_PutDisp_DD(void) {
     for (int y = 0; y < 240; y++) {
         for (int x = 0; x < 396; x++) {
             if (y >= LCD_HEIGHT_PX || (x < 6 || x >= 390)) {
-                _DRAM[x + y * 396] = _fxCG_0xFD801460;
+                _DD[x + y * 396] = _fxCG_0xFD801460;
                 continue;
             }
-            _DRAM[x + y * 396] = _VRAM[x - 6 + y * 384];
+            _DD[x + y * 396] = _VRAM[x - 6 + y * 384];
         }
     }
 }
@@ -565,7 +521,7 @@ void Bdisp_PutDisp_DD_stripe(int y1, int y2)
 
 void Bdisp_SetPoint_DD( int x, int y, int color ) {
     if (x < 0 || x >= LCD_WIDTH_PX || y < 0 || y >= LCD_HEIGHT_PX) return;
-    _DRAM[6 + x + y * 396] = (unsigned short)color;
+    _DD[6 + x + y * 396] = (unsigned short)color;
 }
 
 unsigned short Bdisp_GetPoint_DD_Workbench(int x, int y)
@@ -575,7 +531,7 @@ unsigned short Bdisp_GetPoint_DD_Workbench(int x, int y)
 unsigned short Bdisp_GetPoint_DD(int x, int y)
 {
     if (x < 0 || x >= LCD_WIDTH_PX || y < 0 || y >= LCD_HEIGHT_PX) return 0;
-    return _DRAM[6 + x + y * 396];
+    return _DD[6 + x + y * 396];
 }
 void DirectDrawRectangle( int x1, int y1, int x2, int y2, unsigned short color )
 {
@@ -588,7 +544,7 @@ void DirectDrawRectangle( int x1, int y1, int x2, int y2, unsigned short color )
     
     for (int y = y1; y <= y2; y++) {
         for (int x = x1; x <= x2; x++) {
-            _DRAM[x + y * 396] = color;
+            _DD[x + y * 396] = color;
         }
     }
 }
@@ -623,7 +579,7 @@ void PrintCXY( int x, int y, const char *text, int mode, int P5, int color, int 
         bgcolor = tmp;
     }
     
-    struct display_fill area = {
+    TBdispFillArea area = {
         .x1 = x, .y1 = y, .x2 = x + GetTextSize((unsigned char *)text, FontSize24pt) - 1, .y2 = y + 23
     };
     Bdisp_AreaClr(&area, 0x01, bgcolor);
@@ -634,9 +590,9 @@ void PrintGlyph(int x, int y, unsigned char *glyph, int mode_flags, int color, i
 {
     
     if (!(mode_flags & 0x20)) {
-        struct display_fill area;
+        TBdispFillArea area;
     
-        area.mode = 1;
+        area.mode = AreaModeColor;
         area.x1 = x;
         area.y1 = y;
         area.x2 = x + 17;
@@ -675,7 +631,7 @@ void PrintMini( int *x, int *y, const char *MB_string, int mode_flags, unsigned 
         back_color = tmp;
     }
     if (!(mode_flags & 0x2)) {
-        struct display_fill area = {
+        TBdispFillArea area = {
             .x1 = *x, .y1 = *y, .x2 = *x + GetTextSize((unsigned char *)MB_string, FontSize24pt) - 1, .y2 = *y + 17
         };
         Bdisp_AreaClr(&area, 0x01, back_color);
@@ -800,10 +756,9 @@ void BatteryIcon( unsigned int p1)
     
 }
 
-void EnableStatusArea(int opt)
+void EnableStatusArea(TStatusArea opt)
 {
-    if (opt == 0 || opt == 2) _fxCG_StatusArea = 1;
-    if (opt == 3) _fxCG_StatusArea = 0;
+    _fxCG_StatusArea = (opt == StatusAreaDisable) ? 0 : 1;
 }
 
 void EnableDisplayHeader(int action, int value)

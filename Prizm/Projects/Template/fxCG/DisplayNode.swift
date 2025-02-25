@@ -23,8 +23,8 @@
 
 import SpriteKit
 
-@_silgen_name("GetDRAMAddress")
-func GetDRAMAddress() -> UnsafeMutableRawPointer?
+@_silgen_name("GetDDAddress")
+func GetDDAddress() -> UnsafeMutableRawPointer?
 
 @_silgen_name("FrameColor")
 func FrameColor(mode: Int, color: UInt16) -> UInt16?
@@ -77,7 +77,7 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
     
     @objc func redraw() {
         mutableTexture.modifyPixelData { pixelData, lengthInBytes in
-            guard let dramPointer = GetDRAMAddress()?.assumingMemoryBound(to: UInt16.self),
+            guard let dramPointer = GetDDAddress()?.assumingMemoryBound(to: UInt16.self),
                   let pixelBuffer = pixelData?.assumingMemoryBound(to: UInt32.self) else {
                 return
             }
