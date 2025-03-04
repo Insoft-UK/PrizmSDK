@@ -54,12 +54,7 @@ if [ ! -d "/Applications/CASIO/PrizmSDK" ]; then
 fi
 
 mkdir -p ~/sh3eb-toolchain
-cp prizm_rules ~/sh3eb-toolchain/prizm_rules
-cd ~/sh3eb-toolchain
-
-if [ ! -d "libfxcg" ]; then
-    git clone https://github.com/Insoft-UK/libfxcg.git
-fi
+cp -a libfxcg ~/sh3eb-toolchain/
 cd ~/sh3eb-toolchain/libfxcg
 make
 make install
@@ -70,8 +65,7 @@ cp -a include /Applications/CASIO/PrizmSDK/
 cd ~/sh3eb-toolchain
 cp prizm_rules $LIBFXCG/toolchain
 
-find /Applications/CASIO/PrizmSDK -type f -exec file {} \; | grep Mach-O | cut -d: -f1 | xargs strip > /dev/null 2>&1
-rm ~/sh3eb-toolchain
+rm -r ~/sh3eb-toolchain
 
 read -p "PrizmSDK updated."
 

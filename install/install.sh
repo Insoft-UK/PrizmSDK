@@ -61,13 +61,14 @@ if [ ! -d "/opt/homebrew" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-brew install libpng cmake gmp mpfr libmpc isl wget make gcc imagemagick
-
+brew install libpng cmake gmp mpfr libmpc isl wget make gcc
 
 mkdir -p ~/sh3eb-toolchain
 if [ ! -d "~/Document/Prizm" ]; then
     cp -r Prizm ~/Documents
 fi
+cp -a libfxcg ~/sh3eb-toolchain/
+cp -a mkg3a ~/sh3eb-toolchain/
 cd ~/sh3eb-toolchain
 
 if [ ! -d "gcc" ]; then
@@ -78,7 +79,6 @@ if [ ! -d "gcc" ]; then
     tar -xzvf gcc-14.2.0.tar.gz --strip-components=1 -C gcc
 fi
 
-
 if [ ! -d "binutils" ]; then
     if [ ! -f "binutils-2.36.tar.gz" ]; then
         wget https://ftp.gnu.org/gnu/binutils/binutils-2.36.tar.gz
@@ -86,6 +86,8 @@ if [ ! -d "binutils" ]; then
     mkdir -p binutils
     tar -xvzf binutils-2.36.tar.gz --strip-components=1 -C binutils
 fi
+
+#Build...
 
 if [ ! -d "binutils/build" ]; then
     mkdir ~/sh3eb-toolchain/binutils/build
@@ -95,8 +97,15 @@ if [ ! -d "binutils/build" ]; then
     make install
 fi
 
-/Applications/CASIO/PrizmSDK/bin/sh3eb-elf-as --version
-/Applications/CASIO/PrizmSDK/bin/sh3eb-elf-ld --version
+if [ ! -f "$FXCGSDK/bin/sh3eb-elf-as" ]; then
+    echo "sh3eb-elf-as missing, failed to install."
+    exit
+fi
+if [ ! -f "$FXCGSDK/bin/sh3eb-elf-ld" ]; then
+    echo "sh3eb-elf-ld missing, failed to install."
+    exit
+fi
+
 read -p "Press Enter to continue..."
 
 if [ ! -d "gcc/build" ]; then
@@ -122,18 +131,13 @@ fi
 find /Applications/CASIO/PrizmSDK -name "sh3eb-elf-gcc"
 read -p "Press Enter to continue..."
 
-if [ ! -d "mkg3a" ]; then
-    git clone https://github.com/tari/mkg3a.git
-fi
+
 cd ~/sh3eb-toolchain/mkg3a
 cmake . -DCMAKE_INSTALL_PREFIX=/Applications/CASIO/PrizmSDK
 make
 make install
 read -p "Press Enter to continue..."
 
-if [ ! -d "libfxcg" ]; then
-    git clone https://github.com/Insoft-UK/libfxcg.git
-fi
 cd ~/sh3eb-toolchain/libfxcg
 #make CC=/Applications/CASIO/PrizmSDK/sh3eb-elf/bin/sh3eb-elf-gcc
 make
@@ -144,6 +148,6 @@ cp -a toolchain /Applications/CASIO/PrizmSDK/
 cp -a include /Applications/CASIO/PrizmSDK/
 cd ~/
 
-rm ~/sh3eb-toolchain
+rm -r ~/sh3eb-toolchain
 
 read -p "Press Enter to exit."

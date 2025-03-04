@@ -1,5 +1,12 @@
 .DS_Store
+*.xcworkspace/xcuserdata/
+xcuserdata/
+sync
 releases
+*.o
+*.a
+*.bin
+*.g3a
 installer/build
 build-*
 binutils-*
