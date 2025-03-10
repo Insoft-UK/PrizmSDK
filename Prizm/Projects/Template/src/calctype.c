@@ -61,12 +61,12 @@ static void CalcType_DrawGlyph(TCalcTypeGlyphData *glyph, int x, int y, unsigned
     color_t rgb565;
     color_t invRgb565;
     
-    color_t *vram = ((unsigned short*)GetVRAMAddress()) + x + y * 384;
+//    color_t *vram = ((unsigned short*)GetVRAMAddress()) + x + y * 384;
     unsigned char *data = glyph->data;
 
-    for (y = 0; y < glyph->height; y++) {
-        for (x = 0; x < glyph->width; x++) {
-            int currentPixel = *vram;
+    for (int yy = 0; yy < glyph->height; yy++) {
+        for (int xx = 0; xx < glyph->width; xx++) {
+            int currentPixel = Bdisp_GetPoint_VRAM(x, y);
             uint8_t rgb = *data++;
             
             rgb565 = redMapping[R_CHANNEL(rgb)] | greenMapping[G_CHANNEL(rgb)] | blueMapping[B_CHANNEL(rgb)];
@@ -78,9 +78,11 @@ static void CalcType_DrawGlyph(TCalcTypeGlyphData *glyph, int x, int y, unsigned
             rgb = ~rgb;
             invRgb565 = redMapping[R_CHANNEL(rgb)] | greenMapping[G_CHANNEL(rgb)] | blueMapping[B_CHANNEL(rgb)];
          
-            *vram++ = (color & rgb565) | (currentPixel & invRgb565);
+            Bdisp_SetPoint_VRAM(x, y, (color & rgb565) | (currentPixel & invRgb565));
+            x++;
         }
-        vram += LCD_WIDTH_PX - glyph->width;
+        x -= glyph->width;
+        y++;
     }
 }
 

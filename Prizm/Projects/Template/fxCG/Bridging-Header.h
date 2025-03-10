@@ -10,4 +10,8 @@
 
 #include <fxcg/keyboard.h>
 
+
+
+extern unsigned short fxCG_SAF(void);
+
 #endif /* Bridging_Header_h */

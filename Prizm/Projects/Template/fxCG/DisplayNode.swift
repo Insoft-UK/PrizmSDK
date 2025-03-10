@@ -31,6 +31,17 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
 
 
 @objc class DisplayNode: SKNode {
+    enum StatusFlag: UInt16 {
+        case Battery = 0x0001
+        case AlphaShift = 0x0002
+        case SetupInputOutput = 0x0004
+        case SetupFracResult = 0x0008
+        case SetupAngle = 0x0010
+        case SetupComplexMode = 0x0020
+        case SetupDisplay = 0x0040
+        case Text = 0x0100
+        case Glyph = 0x0200
+    }
     
     static let shared = DisplayNode()
     
@@ -39,6 +50,9 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
     private var display: SKSpriteNode!
     
     private var battery: SKSpriteNode!
+    private var shift: SKSpriteNode!
+    private var alphaSymbol: SKSpriteNode!
+    private var alphaFrames: [SKTexture] = []
     
     // MARK: - Private class variables
 
@@ -60,20 +74,55 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
         let size = CGSize(width: CGFloat(396), height: CGFloat(224))
         
         display = SKSpriteNode(color: .clear, size: size)
-//        display.yScale = -1
         addChild(display)
 
         mutableTexture = SKMutableTexture(size: display.size)
         display.texture = mutableTexture
         display.blendMode = .replace
+        display.texture?.filteringMode = .nearest
         zPosition = 1
         
-        battery = SKSpriteNode(imageNamed: "Bat25%")
-        battery.anchorPoint = .zero
-        battery.position = CGPoint(x: 198 - battery.size.width - 6, y: 112 - battery.size.height)
-        display.addChild(battery)
+        setupBattery()
+        
+        alphaFrames.append(SKTexture(imageNamed: "Alpha"))
+        alphaFrames.append(SKTexture(imageNamed: "AlphaLocked"))
+        
+        alphaSymbol = SKSpriteNode(texture: alphaFrames[0])
+        alphaSymbol.anchorPoint = .zero
+        alphaSymbol.position = CGPoint(x: -198 + 6 + 18, y: 112 - 22)
+        alphaSymbol.texture?.filteringMode = .nearest
+        display.addChild(alphaSymbol)
+        
+        shift = SKSpriteNode(imageNamed: "Shift")
+        shift.anchorPoint = .zero
+        shift.position = CGPoint(x: -198 + 6 + 18, y: 112 - 22)
+        shift.texture?.filteringMode = .nearest
+        display.addChild(shift)
     }
     
+    func setupBattery() {
+        let batteryAnimatedAtlas = SKTextureAtlas(named: "Battery")
+        var batteryLevelframes: [SKTexture] = []
+        
+        batteryLevelframes.append(batteryAnimatedAtlas.textureNamed("Bat100%"))
+        batteryLevelframes.append(batteryAnimatedAtlas.textureNamed("Bat75%"))
+        batteryLevelframes.append(batteryAnimatedAtlas.textureNamed("Bat25%"))
+        batteryLevelframes.append(batteryAnimatedAtlas.textureNamed("Bat0%"))
+        
+        
+        battery = SKSpriteNode(texture: batteryLevelframes[0])
+        battery.anchorPoint = .zero
+        battery.position = CGPoint(x: -198 + 6, y: 112 - 22)
+        battery.texture?.filteringMode = .nearest
+        display.addChild(battery)
+        
+        battery.run(SKAction.repeatForever(
+        SKAction.animate(with: batteryLevelframes,
+                         timePerFrame: 60,
+                         resize: false,
+                         restore: true)),
+        withKey:"battery")
+    }
     
     @objc func redraw() {
         mutableTexture.modifyPixelData { pixelData, lengthInBytes in
@@ -95,6 +144,16 @@ func FrameColor(mode: Int, color: UInt16) -> UInt16?
                 }
             }
         }
+        
+        battery.isHidden = (fxCG_SAF() & 0x0001 == 0)
+        shift.isHidden = (fxCG_SAF() & 0x0002 == 0)
+        alphaSymbol.isHidden = (fxCG_SAF() & 0x0100 == 0)
+        if fxCG_SAF() & 0x0002 == 1 {
+            alphaSymbol.texture = alphaFrames[1]
+        } else {
+            alphaSymbol.texture = alphaFrames[0]
+        }
+        
     }
 
 }

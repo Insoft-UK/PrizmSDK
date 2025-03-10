@@ -26,7 +26,7 @@
 #include <fxcg/display.h>
 #include "types.h"
 
-#define FXCG_drawPixel Bdisp_SetPoint_VRAM
+//#define FXCG_drawPixel Bdisp_SetPoint_VRAM
 
 #ifdef __cplusplus
 extern "C" {

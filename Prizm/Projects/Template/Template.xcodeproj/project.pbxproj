@@ -11,6 +11,19 @@
 		13EB1FE32D6BC38E00CA5328 /* version.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = version.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		13EB22052D70CD5B00CA5328 /* Exceptions for "src" folder in "Compile Sources" phase from "Template" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 13EB1EDF2D69F6E100CA5328 /* Sources */;
+			membershipExceptions = (
+				fonts/arial.h,
+				fonts/commodore.h,
+				fonts/consolas.h,
+				fonts/garamond.h,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		13EB1EE52D69F6E100CA5328 /* fxCG */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -19,6 +32,9 @@
 		};
 		13EB1FA22D6BC0BA00CA5328 /* src */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				13EB22052D70CD5B00CA5328 /* Exceptions for "src" folder in "Compile Sources" phase from "Template" target */,
+			);
 			path = src;
 			sourceTree = "<group>";
 		};

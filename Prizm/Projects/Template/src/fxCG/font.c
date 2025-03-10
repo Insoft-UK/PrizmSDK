@@ -46,7 +46,7 @@ int FXCG_drawGlyph(short x, short y, unsigned char c, color_t color, FXCG_TFont 
                 bitmap++;
             }
             if (*bitmap & bitPosition) {
-                FXCG_drawPixel(x + xx, y, color);
+                Bdisp_SetPoint_VRAM(x + xx, y, color);
             }
             bitPosition >>= 1;
         }

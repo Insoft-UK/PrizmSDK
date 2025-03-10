@@ -66,6 +66,18 @@ typedef enum : int {
     StatusAreaEnabled = 0, StatusAreaDisable = 3
 } TStatusArea;
 
+typedef struct {
+    unsigned int I1; // unknown changes indicator height, set to 0
+    unsigned int indicatorMaximum; // max logical indicator range
+    unsigned int indicatorHeight; // height of the indicator in units
+    unsigned int indicatorPosition; // indicator position in units of max
+    unsigned int I5; // unknown, set to 0
+    unsigned short barLeft; // x position of bar
+    unsigned short barTop; // y position of bar
+    unsigned short barHeight; // height of bar
+    unsigned short barWidth; // width of bar
+} TScrollbar;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -216,19 +228,9 @@ extern "C" {
     void DisableGB18030(void);
     
     //Progressbars and scrollbars:
-    struct scrollbar
-    {
-        unsigned int I1; // unknown changes indicator height, set to 0
-        unsigned int indicatormaximum; // max logical indicator range
-        unsigned int indicatorheight; // height of the indicator in units
-        unsigned int indicatorpos; // indicator position in units of max
-        unsigned int I5; // unknown, set to 0
-        unsigned short barleft; // x position of bar
-        unsigned short bartop; // y position of bar
-        unsigned short barheight; // height of bar
-        unsigned short barwidth; // width of bar
-    } ;
-    void Scrollbar(struct scrollbar *scrollbar);
+    
+    
+    void Scrollbar(TScrollbar *scrollbar);
     void StandardScrollbar(void*);
     void ProgressBar(int, int );
     void ProgressBar0(int P1, int P2, int P3, int current, int max);

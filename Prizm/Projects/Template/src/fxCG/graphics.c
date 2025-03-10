@@ -27,12 +27,12 @@
 static bool is_half_opacity_enabled = false;
 
 
-void FXCG_enableHalfOpacityDrawing()
+void FXCG_enableHalfOpacityDrawing(void)
 {
     is_half_opacity_enabled = true;
 }
 
-void FXCG_disableHalfOpacityDrawing()
+void FXCG_disableHalfOpacityDrawing(void)
 {
     is_half_opacity_enabled = false;
 }
@@ -109,7 +109,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, color_t color)
             return;
         }
         for (; y1 < y2; y1++)
-            FXCG_drawPixel(x1, y1, color);
+            Bdisp_SetPoint_VRAM(x1, y1, color);
         return;
     }
     
@@ -121,7 +121,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, color_t color)
             return;
         }
         for (; x1 < x2; x1++)
-            FXCG_drawPixel(x1, y1, color);
+            Bdisp_SetPoint_VRAM(x1, y1, color);
         
         return;
     }
@@ -149,7 +149,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, color_t color)
         delta_y = y1 - y2;
     }
     
-    FXCG_drawPixel(x1, y1, color);
+    Bdisp_SetPoint_VRAM(x1, y1, color);
     if (delta_x >= delta_y) {
         int error = delta_y - (delta_x >> 1);        // error may go below zero
         while (x1 != x2) {
@@ -161,7 +161,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, color_t color)
             }                              // else do nothing
             x1 += ix;
             error += delta_y;
-            FXCG_drawPixel(x1, y1, color);
+            Bdisp_SetPoint_VRAM(x1, y1, color);
         }
     } else {
         int error = delta_x - (delta_y >> 1);      // error may go below zero
@@ -174,7 +174,7 @@ void FXCG_drawLine(int x1, int y1, int x2, int y2, color_t color)
             }                              // else do nothing
             y1 += iy;
             error += delta_x;
-            FXCG_drawPixel(x1, y1, color);
+            Bdisp_SetPoint_VRAM(x1, y1, color);
         }
     }
 }
@@ -213,20 +213,20 @@ static void FXCG_drawCircleHelper(int x, int y, short r, uint8_t cornername, col
         ddF_x += 2;
         f += ddF_x;
         if (cornername & 0x4) {
-            FXCG_drawPixel(x + xx, y + yy, color);
-            FXCG_drawPixel(x + yy, y + xx, color);
+            Bdisp_SetPoint_VRAM(x + xx, y + yy, color);
+            Bdisp_SetPoint_VRAM(x + yy, y + xx, color);
         }
         if (cornername & 0x2) {
-            FXCG_drawPixel(x + xx, y - yy, color);
-            FXCG_drawPixel(x + yy, y - xx, color);
+            Bdisp_SetPoint_VRAM(x + xx, y - yy, color);
+            Bdisp_SetPoint_VRAM(x + yy, y - xx, color);
         }
         if (cornername & 0x8) {
-            FXCG_drawPixel(x - yy, y + xx, color);
-            FXCG_drawPixel(x - xx, y + yy, color);
+            Bdisp_SetPoint_VRAM(x - yy, y + xx, color);
+            Bdisp_SetPoint_VRAM(x - xx, y + yy, color);
         }
         if (cornername & 0x1) {
-            FXCG_drawPixel(x - yy, y - xx, color);
-            FXCG_drawPixel(x - xx, y - yy, color);
+            Bdisp_SetPoint_VRAM(x - yy, y - xx, color);
+            Bdisp_SetPoint_VRAM(x - xx, y - yy, color);
         }
     }
 }
@@ -239,10 +239,10 @@ void FXCG_drawCircle(int x, int y, short r, color_t color)
     short xx = 0;
     short yy = r;
     
-    FXCG_drawPixel(x, y + r, color);
-    FXCG_drawPixel(x, y - r, color);
-    FXCG_drawPixel(x + r, y, color);
-    FXCG_drawPixel(x - r, y, color);
+    Bdisp_SetPoint_VRAM(x, y + r, color);
+    Bdisp_SetPoint_VRAM(x, y - r, color);
+    Bdisp_SetPoint_VRAM(x + r, y, color);
+    Bdisp_SetPoint_VRAM(x - r, y, color);
     
     while (xx < yy) {
         if (f >= 0) {
@@ -254,14 +254,14 @@ void FXCG_drawCircle(int x, int y, short r, color_t color)
         ddF_x += 2;
         f += ddF_x;
         
-        FXCG_drawPixel(x + xx, y + yy, color);
-        FXCG_drawPixel(x - xx, y + yy, color);
-        FXCG_drawPixel(x + xx, y - yy, color);
-        FXCG_drawPixel(x - xx, y - yy, color);
-        FXCG_drawPixel(x + yy, y + xx, color);
-        FXCG_drawPixel(x - yy, y + xx, color);
-        FXCG_drawPixel(x + yy, y - xx, color);
-        FXCG_drawPixel(x - yy, y - xx, color);
+        Bdisp_SetPoint_VRAM(x + xx, y + yy, color);
+        Bdisp_SetPoint_VRAM(x - xx, y + yy, color);
+        Bdisp_SetPoint_VRAM(x + xx, y - yy, color);
+        Bdisp_SetPoint_VRAM(x - xx, y - yy, color);
+        Bdisp_SetPoint_VRAM(x + yy, y + xx, color);
+        Bdisp_SetPoint_VRAM(x - yy, y + xx, color);
+        Bdisp_SetPoint_VRAM(x + yy, y - xx, color);
+        Bdisp_SetPoint_VRAM(x - yy, y - xx, color);
     }
 }
 

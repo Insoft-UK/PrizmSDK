@@ -24,34 +24,86 @@
 #define AddIn_main main
 #endif
 
+#include <stdio.h>
+#include <stdint.h>
+
 #include <fxcg/display.h>
 #include <fxcg/keyboard.h>
 #include <fxcg/system.h>
 
 #include "graphics.h"
+#include "calctype.h"
 
-int AddIn_main(int argc, const char * argv[]) {
-    int key;
+#include "fonts/consolas.h"
+#include "fonts/garamond.h"
+#include "fonts/commodore.h"
+#include "fonts/arial.h"
+
+#define true 1
+
+void AddIn_quit(void)
+{
+    FrameColor(FrameModeColor, COLOR_WHITE);
+    DrawFrame(COLOR_WHITE);
+    Bdisp_EnableColor(ColorModeIndex);
+}
+
+void AddIn_setup(void)
+{
+    SetQuitHandler(AddIn_quit);
+    
+    FrameColor(FrameModeColor, COLOR_WHITE);
+    DrawFrame(COLOR_WHITE);
     
     Bdisp_AllClr_VRAM();
-    Bdisp_EnableColor(1);
-    EnableStatusArea(0);
+    Bdisp_EnableColor(ColorModeFull);
     
-    Print_OS("Press EXE to exit", 0, 0);
+    char indexColor = TEXT_COLOR_WHITE;
+    DefineStatusAreaFlags(3, SAF_BATTERY | SAF_TEXT | SAF_GLYPH | SAF_ALPHA_SHIFT, &indexColor, &indexColor);
+    EnableStatusArea(StatusAreaEnabled);
+}
+
+int AddIn_main(int argc, const char * argv[])
+{
+    int key;
     
-    TBdispFillArea area = {
-        0, 40, 160, 191, AreaModeColor
+    AddIn_setup();
+
+    /*
+     The GetKey function can interrupt add-in execution and transfer
+     control back to the OS. When a new add-in is launched, the currently
+     running one is discarded, and the new add-in is loaded and executed.
+     
+     You should *NEVER* exit main in an add-in. If you do, running the
+     add-in again (until another add-in is executed) will result in a blank
+     screen before returning to the MENU screen. To prevent this, it’s best
+     to use a while loop to keep the add-in running.
+     */
+    
+    TScrollbar scrollbar = {
+        .I1 = 0, .I5 = 0,
+        .barHeight = 150, .barWidth = 6,
+        .barTop = 0, .barLeft = 0,
+        .indicatorHeight = 50,
+        .indicatorMaximum = 100,
+        .indicatorPosition = 5
     };
-    Bdisp_AreaClr(&area, 0, 0xF800);
     
-    while (1) {
+    while (true) {
+        CalcType_DrawString(&Garamond, "Press MENU to exit", 0, 22 + 15, COLOR_BLACK);
+        CalcType_DrawString(&Consolas, "You should *NEVER* exit main in an add-in.", 0, 22 + Garamond.height + 9, 0);
+        
+       
+    
+        
+        
+        
+        Scrollbar(&scrollbar);
+      
         GetKey(&key);
         
-        if (key == KEY_CTRL_EXE) {
-            break;
-        }
-    
-        OS_InnerWait_ms(1000);
+        if (key == KEY_PRGM_RIGHT) scrollbar.barWidth++;
+        
     }
     
     return 0;

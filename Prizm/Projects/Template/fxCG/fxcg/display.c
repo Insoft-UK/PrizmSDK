@@ -100,6 +100,12 @@ void *GetDDAddress(void)
 #include "CASIO/fxCG50_24pt0xE5XX.h"
 #include "CASIO/fxCG50_24pt0xE6XX.h"
 
+
+unsigned short fxCG_SAF(void)
+{
+    return _fxCG_SAF;
+}
+
 static GFXfont Get24ptFont(unsigned char extendedCode)
 {
     switch (extendedCode) {
@@ -671,6 +677,46 @@ void Bdisp_MMPrint(int x, int y, unsigned char *s, int mode, int xmax, int P6, i
     DrawText(x, y + 24, (const char*)s, color, FontSize16pt);
 }
 
+
+// MARK: - Scrollbar
+
+void Scrollbar(TScrollbar *scrollbar)
+{
+    color_t color;
+    for (int y = 0; y < scrollbar->barHeight; y++) {
+        for (int x = 0; x < scrollbar->barWidth; x++) {
+            if (x == 0 || x == scrollbar->barWidth - 1 || y == 0 || y == scrollbar->barHeight - 1) {
+                color = COLOR_BLACK;
+            } else {
+                color = COLOR_BLUE;
+                if (x > 1) {
+                    color = COLOR_WHITE;
+                    if (y & 1) {
+                        if (!(x & 1)) color = COLOR_CYAN;
+                    } else {
+                        if (x & 1) color = COLOR_CYAN;
+                    }
+                }
+            }
+            _VRAM[x + (y + 24) * 384] = color;
+        }
+    }
+    
+    
+    for (int y = scrollbar->indicatorPosition - 1; y <= scrollbar->indicatorHeight; y++) {
+        for (int x = 1; x < scrollbar->barWidth - 1; x++) {
+            color = COLOR_BLUE;
+            if (x == 1 || y == scrollbar->indicatorPosition) {
+                color = COLOR_CYAN;
+            }
+            if (x == scrollbar->barWidth - 2 || y == scrollbar->indicatorPosition - 1 || y >= scrollbar->indicatorHeight - 1) color = 0;
+            _VRAM[x + (y + 24) * 384] = color;
+            
+        }
+    }
+}
+
+
 // MARK: - Status area/header related syscalls:
 
 int DefineStatusAreaFlags( int mode, int flags, char *color1, char *color2 )
@@ -729,7 +775,7 @@ void DisplayStatusArea(void)
     }
     
     for (int x = 0; x < LCD_WIDTH_PX; x++) {
-        _VRAM[x + 23 * LCD_WIDTH_PX] = 0;
+        _VRAM[x + 22 * LCD_WIDTH_PX] = 0;
     }
     
     if (_fxCG_SAF & SAF_BATTERY)
