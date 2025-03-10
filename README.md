@@ -6,7 +6,7 @@ This document will walk you through the process of setting up the <a href="https
 
 Download an PrizmSDK binary for Intel or AppleSilicon from the [releases page](https://github.com//Insoft-UK/libfxcg/releases/) and unpack to your Applications/CASIO folder.
 
-![Extracted SDK package](libfxcg/docs/img/sdk-dir.png)
+![Extracted SDK package](img/sdk-dir.png)
 
 Make sure macOS knows the path of the PrizmSDK.
 ```
@@ -26,7 +26,7 @@ The installer package is for AppleSilicon only.
 Download the Prizm folder from the GitHub Repositories [Prizm](https://github.com/Insoft-UK/PrizmSDK/tree/main/Prizm) and copy to your ~/Documents folder.
 Navigate to `Prizm/Projects`, then `Template`. This directory contains an Xcode project example project to get you started with and looks like this:
 
-![Example Xcode project](libfxcg/docs/img/Xcode.png)
+![Example Xcode project](img/Xcode.png)
 
 The `Icon~sel.bmp` and `Icon~uns.bmp` images are built into the compiled add-in and are the icons shown in the calculator's menus for the add-in when it is selected with the cursor and unselected, respectively.
 
@@ -37,11 +37,11 @@ The `Icon~sel.bmp` and `Icon~uns.bmp` images are built into the compiled add-in 
 To compile the Example project, simply run `make.sh` in the project directory
 using the Terminal.
 
-![Example project directory layout](libfxcg/docs/img/open-terminal.png)
+![Example project directory layout](img/open-terminal.png)
 
 The `Example.g3a` file is ready to send to your calculator for running now.
 
-![Example project directory layout](libfxcg/docs/img/result.png)
+![Example project directory layout](img/result.png)
 
 ## Making changes and rebuilding
 
