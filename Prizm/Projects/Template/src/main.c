@@ -93,11 +93,6 @@ int AddIn_main(int argc, const char * argv[])
         CalcType_DrawString(&Garamond, "Press MENU to exit", 0, 22 + 15, COLOR_BLACK);
         CalcType_DrawString(&Consolas, "You should *NEVER* exit main in an add-in.", 0, 22 + Garamond.height + 9, 0);
         
-       
-    
-        
-        
-        
         Scrollbar(&scrollbar);
       
         GetKey(&key);

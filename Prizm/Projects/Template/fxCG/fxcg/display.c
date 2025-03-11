@@ -306,31 +306,10 @@ static int fxCG_Range(int min, int max, int value) {
 
 color_t convertTextColorToRGB565(char ink)
 {
-    
-    switch (ink) {
-        case 1:
-            return 0x001F;
-            
-        case 2:
-            return 0x07E0;
-            
-        case 3:
-            return 0x07FF;
-            
-        case 4:
-            return 0xF800;
-            
-        case 5:
-            return 0xF81F;
-            
-        case 6:
-            return 0xFFE0;
-            
-        case 7:
-            return 0xFFFF;
-    }
-    
-    return 0xFFFF;
+    static color_t color[] = {
+        0x0000, 0x001F, 0x07E0, 0x07FF, 0xF800, 0xF81F, 0xFFE0, 0xFFFF
+    };
+    return color[ink & 0x7];
 }
 
 // MARK: - fxcg
@@ -680,12 +659,12 @@ void Bdisp_MMPrint(int x, int y, unsigned char *s, int mode, int xmax, int P6, i
 
 // MARK: - Scrollbar
 
-void Scrollbar(TScrollbar *scrollbar)
+static void drawScrollBarTrack(unsigned short x, unsigned short y, unsigned short w, unsigned short h)
 {
     color_t color;
-    for (int y = 0; y < scrollbar->barHeight; y++) {
-        for (int x = 0; x < scrollbar->barWidth; x++) {
-            if (x == 0 || x == scrollbar->barWidth - 1 || y == 0 || y == scrollbar->barHeight - 1) {
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            if (x == 0 || x == w - 1 || y == 0 || y == h - 1) {
                 color = COLOR_BLACK;
             } else {
                 color = COLOR_BLUE;
@@ -701,19 +680,51 @@ void Scrollbar(TScrollbar *scrollbar)
             _VRAM[x + (y + 24) * 384] = color;
         }
     }
+}
+
+static void drawScrollBarThumb(unsigned short x, unsigned short y, unsigned short w, unsigned short h)
+{
+    TBdispFillArea fillArea = {
+        .mode = AreaModeColor,
+        .x1 = x + 1,
+        .y1 = y,
+        .x2 = x + w - 2,
+        .y2 = y + h - 1
+    };
     
-    int h = scrollbar->indicatorHeight * 100 / scrollbar->indicatorMaximum * scrollbar->barHeight / 100;
-    for (int y = scrollbar->indicatorPosition - 1; y <= h; y++) {
-        for (int x = 1; x < scrollbar->barWidth - 1; x++) {
-            color = COLOR_BLUE;
-            if (x == 1 || y == scrollbar->indicatorPosition) {
-                color = COLOR_CYAN;
-            }
-            if (x == scrollbar->barWidth - 2 || y == scrollbar->indicatorPosition - 1 || y >= h - 1) color = 0;
-            _VRAM[x + (y + 24) * 384] = color;
-            
-        }
+    Bdisp_AreaClr(&fillArea, TargetVRAM, COLOR_BLACK);
+    
+    fillArea.y1++;
+    fillArea.x2--;
+    fillArea.y2-=2;
+    Bdisp_AreaClr(&fillArea, TargetVRAM, COLOR_CYAN);
+    
+    fillArea.x1++;
+    fillArea.y1++;
+    Bdisp_AreaClr(&fillArea, TargetVRAM, COLOR_BLUE);
+}
+
+
+void Scrollbar(TScrollbar *scrollbar)
+{
+    if (scrollbar->indicatorHeight > scrollbar->indicatorMaximum) {
+        scrollbar->indicatorHeight = scrollbar->indicatorMaximum;
     }
+    
+    if (scrollbar->indicatorPosition > scrollbar->indicatorMaximum) {
+        scrollbar->indicatorPosition = scrollbar->indicatorMaximum;
+    }
+    
+    drawScrollBarTrack(scrollbar->barLeft, scrollbar->barTop, scrollbar->barWidth, scrollbar->barHeight);
+
+
+    int indicatorHeight = scrollbar->indicatorHeight * 100 / scrollbar->indicatorMaximum * scrollbar->barHeight / 100;
+    
+    int thumbY = scrollbar->indicatorPosition * 100 /
+             scrollbar->indicatorMaximum *
+            (scrollbar->barHeight - indicatorHeight) / 100;
+    
+    drawScrollBarThumb(scrollbar->barLeft, thumbY + 24, scrollbar->barWidth, indicatorHeight);
 }
 
 
