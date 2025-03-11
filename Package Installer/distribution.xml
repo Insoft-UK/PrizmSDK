@@ -10,5 +10,5 @@
     <choice id="default" title="Install PrizmSDK">
         <pkg-ref id="uk.insoft.PrizmSDK"/>
     </choice>
-    <pkg-ref id="uk.insoft.PrizmSDK" installKBytes="149600" version="1.0" onConclusion="none">PrizmSDK-signed.pkg</pkg-ref>
+    <pkg-ref id="uk.insoft.PrizmSDK" installKBytes="148228" version="1.0" onConclusion="none">PrizmSDK-signed.pkg</pkg-ref>
 </installer-gui-script>
