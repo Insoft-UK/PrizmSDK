@@ -702,14 +702,14 @@ void Scrollbar(TScrollbar *scrollbar)
         }
     }
     
-    
-    for (int y = scrollbar->indicatorPosition - 1; y <= scrollbar->indicatorHeight; y++) {
+    int h = scrollbar->indicatorHeight * 100 / scrollbar->indicatorMaximum * scrollbar->barHeight / 100;
+    for (int y = scrollbar->indicatorPosition - 1; y <= h; y++) {
         for (int x = 1; x < scrollbar->barWidth - 1; x++) {
             color = COLOR_BLUE;
             if (x == 1 || y == scrollbar->indicatorPosition) {
                 color = COLOR_CYAN;
             }
-            if (x == scrollbar->barWidth - 2 || y == scrollbar->indicatorPosition - 1 || y >= scrollbar->indicatorHeight - 1) color = 0;
+            if (x == scrollbar->barWidth - 2 || y == scrollbar->indicatorPosition - 1 || y >= h - 1) color = 0;
             _VRAM[x + (y + 24) * 384] = color;
             
         }
