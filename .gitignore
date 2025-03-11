@@ -7,7 +7,7 @@ releases
 *.a
 *.bin
 *.g3a
-installer/build
+Package\ Installer/build
 build-*
 binutils-*
 gcc-*
