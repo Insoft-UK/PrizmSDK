@@ -98,6 +98,10 @@ void FXCG_keyUpdate(void)
         _key.released[i] = _key.last[i] & ~_key.held[i];
         
         _key.last[i] = _key.held[i];
+        
+#ifdef DEBUG
+    printf("key: %d\n", _key.held[i]);
+#endif
     }
 }
 
@@ -131,10 +135,9 @@ static bool FXCG_isKeyHold(FXCG_TKeyCode keycode, const uint8_t *data)
     int row = keycode % 10;
     int col = keycode / 10 - 1;
     
-    int word = row >> 1;
     int bit = 7 - col;
     
-    return (0 != (data[word] & 1 << bit));
+    return (0 != (data[row] & 1 << bit));
 }
 
 

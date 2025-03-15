@@ -97,11 +97,6 @@ int AddIn_main(int argc, const char * argv[])
         Scrollbar(&scrollbar);
         DisplayStatusArea();
         
-        // Display the keycode in HEX
-        WordToHex((unsigned short)keycode, str);
-        Bdisp_MMPrint(140, 0, str, 0, 0xFFFFFFFF, 0, 0, COLOR_BLACK, COLOR_WHITE, 1, 0);
-        
-        
         Bdisp_PutDisp_DD();
       
         FXCG_keyUpdate();
@@ -109,17 +104,15 @@ int AddIn_main(int argc, const char * argv[])
             GetKey(&key);
         }
         
-        
-        
         if (FXCG_isKeyPressed(K_Left) && scrollbar.barWidth > 6) scrollbar.barWidth--;
         if (FXCG_isKeyPressed(K_Right)) scrollbar.barWidth++;
-//        if (key.pressed == KEY_PRGM_UP && scrollbar.indicatorPosition > 0) scrollbar.indicatorPosition--;
-//        if (key.pressed == KEY_PRGM_DOWN && scrollbar.indicatorPosition < scrollbar.indicatorMaximum) scrollbar.indicatorPosition++;
-//        if (key.pressed == KEY_PRGM_F1 && scrollbar.indicatorMaximum > 1) scrollbar.indicatorMaximum--;
-//        if (key.pressed == KEY_PRGM_F6) scrollbar.indicatorMaximum++;
-//        
-//        if (key.pressed == KEY_PRGM_F2 && scrollbar.indicatorHeight > 1) scrollbar.indicatorHeight--;
-//        if (key.pressed == KEY_PRGM_F5) scrollbar.indicatorHeight++;
+        if (FXCG_isKeyPressed(K_Up) && scrollbar.indicatorPosition > 0) scrollbar.indicatorPosition--;
+        if (FXCG_isKeyPressed(K_Down) && scrollbar.indicatorPosition < scrollbar.indicatorMaximum) scrollbar.indicatorPosition++;
+        if (FXCG_isKeyPressed(K_F1) && scrollbar.indicatorMaximum > 1) scrollbar.indicatorMaximum--;
+        if (FXCG_isKeyPressed(K_F6)) scrollbar.indicatorMaximum++;
+        
+        if (FXCG_isKeyPressed(K_F2) && scrollbar.indicatorHeight > 1) scrollbar.indicatorHeight--;
+        if (FXCG_isKeyPressed(K_F5)) scrollbar.indicatorHeight++;
         
         if (scrollbar.indicatorPosition > scrollbar.indicatorMaximum) {
             scrollbar.indicatorPosition = scrollbar.indicatorMaximum;
