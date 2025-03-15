@@ -1,7 +1,6 @@
 // The MIT License (MIT)
 //
 // Copyright (c) 2025 Insoft. All rights reserved.
-// Originaly created 2023
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +21,7 @@
 // SOFTWARE.
 
 
-#include <fxcg/file.h>
+#include <file.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +31,6 @@
 #define SMEM "~/Documents/Prizm/SMEM/"
 
 static FILE *gFile[2] = {NULL, NULL};
-static char _buf[1024];
 
 typedef enum {
     kCreateMode_File = 1,

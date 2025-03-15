@@ -86,7 +86,6 @@ extern "C" {
     /**
      @brief Performs a VRAM or DD operation to fill an area with a color, depending on the mode of area.
      @param area area to fill, and mode
-     @param mode if 0, area is filled white; if 1, area is filled with color, if 2, area is shaded with color; if 4, area will be inverted (may be a bug).
      @param target where to perform the operation, VRAM or DD. If bit target.0 is set, the function performs a VRAM operation. If bit target.1 is set, the function performs a DD operation.
      @param color color that will be used to fill when certain modes are used.
      */

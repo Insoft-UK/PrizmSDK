@@ -20,11 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef font_h
-#define font_h
+#ifndef __FXCG_FONT_H
+#define __FXCG_FONT_H
 
+#ifndef __clang__
 #include <fxcg/display.h>
-#include "types.h"
+#else
+#include <display.h>
+#endif
+
 
 #define GFXglyph FXCG_TGlyph
 #define GFXfont FXCG_TFont

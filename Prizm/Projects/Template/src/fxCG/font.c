@@ -23,6 +23,8 @@
 #include "font.h"
 #include "graphics.h"
 
+#include <stdint.h>
+
 static void FXCG_applyOneThirdFilter(uint8_t *input, uint8_t *output, const int width)
 {
     // Handle the first pixel separately (no left neighbor)

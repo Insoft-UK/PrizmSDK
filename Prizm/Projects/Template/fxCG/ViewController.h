@@ -1,7 +1,6 @@
 // The MIT License (MIT)
 //
 // Copyright (c) 2025 Insoft. All rights reserved.
-// Originaly created 2023
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,33 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import Cocoa
-import SpriteKit
+#import <Cocoa/Cocoa.h>
+#import <SpriteKit/SpriteKit.h>
 
-class ViewController: NSViewController {
-    @IBOutlet weak var skView: SKView!
+@interface ViewController : NSViewController
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Ensure skView is properly connected
-        guard let skView = skView else {
-            print("Error: SKView is not connected in Interface Builder")
-            return
-        }
-
-        let scene:SKScene = Scene(size: CGSize(width: 396, height: 224))
-        scene.scaleMode = .aspectFill
-        
-        skView.presentScene(scene)
-    }
-
-    override var representedObject: Any? {
-        didSet {
-        // Update the view, if already loaded.
-        }
-    }
-
-
-}
+@property (weak) IBOutlet SKView *skView;
+@end
 

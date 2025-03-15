@@ -20,22 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef key_h
-#define key_h
+#ifndef __FXCG_KEY_H
+#define __FXCG_KEY_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
 typedef enum {
-    F1    = 79, F2       = 69, F3     = 59, F4    = 49, F5     = 39, F6    = 29,
-    Shift = 78, Optn     = 68, Vars   = 58, Menu  = 48, Left   = 38, Up    = 28,
-    Alpha = 77, Sq       = 67, Power  = 57, Exit  = 47, Down   = 37, Right = 27,
-    XAngT = 76, Log      = 66, Ln     = 56, Sin   = 46, Cos    = 36, Tan   = 26,
-    Abc   = 75, SwapDisp = 65, CubeRt = 55, InvX  = 45, Comma  = 35, Ans   = 25,
-    K7    = 74, K8       = 64, K9     = 54, Del   = 44, On     = 10,
-    K4    = 73, K5       = 63, K6     = 53, Mult  = 43, Div    = 33,
-    K1    = 72, K2       = 62, K3     = 52, Add   = 42, Minus  = 32,
-    K0    = 71, Dot      = 61, Exp    = 51, Neg   = 41, Return = 31, NONE  = 0
+    K_F1    = 79, K_F2       = 69, K_F3     = 59, K_F4    = 49, K_F5     = 39, K_F6    = 29,
+    K_Shift = 78, K_Optn     = 68, K_Vars   = 58, K_Menu  = 48, K_Left   = 38, K_Up    = 28,
+    K_Alpha = 77, K_Sq       = 67, K_Power  = 57, K_Exit  = 47, K_Down   = 37, K_Right = 27,
+    K_XAngT = 76, K_Log      = 66, K_Ln     = 56, K_Sin   = 46, K_Cos    = 36, K_Tan   = 26,
+    K_Abc   = 75, K_SwapDisp = 65, K_CubeRt = 55, K_InvX  = 45, K_Comma  = 35, K_Ans   = 25,
+    K_7     = 74, K_8        = 64, K_9      = 54, K_Del   = 44, K_On     = 10,
+    K_4     = 73, K_5        = 63, K_6      = 53, K_Mult  = 43, K_Div    = 33,
+    K_1     = 72, K_2        = 62, K_3      = 52, K_Add   = 42, K_Minus  = 32,
+    K_0     = 71, K_Dot      = 61, K_Exp    = 51, K_Neg   = 41, K_Return = 31, K_NONE  = 0
 } FXCG_KeyCode;
 
 uint16_t* reg(void);
@@ -61,38 +61,38 @@ extern "C" {
      
      keyUpdate required before using this function.
      */
-    uint16_t *FXCG_keyHeld(void);
+    uint8_t *FXCG_keyHeld(void);
     
     /**
      @brief    Returns key code of key that has been pressed down.
      
      keyUpdate required before using this function.
      */
-    uint16_t *FXCG_keyPressed(void);
+    uint8_t *FXCG_keyPressed(void);
     
     /**
      @brief    Returns true if key has is being held down.
-     @param    code  The fx-CGxx key code.
+     @param    keycode  The fx-CGxx key code.
      
      keyUpdate not required.
      */
-    bool FXCG_isKeyHeld(FXCG_TKeyCode code);
+    bool FXCG_isKeyHeld(FXCG_TKeyCode keycode);
     
     /**
      @brief    Returns true if key has just been pressed.
-     @param    code  The fx-CGxx key code.
+     @param    keycode  The fx-CGxx key code.
      
      keyUpdate required before using this function.
      */
-    bool FXCG_isKeyPressed(FXCG_TKeyCode code);
+    bool FXCG_isKeyPressed(FXCG_TKeyCode keycode);
     
     /**
      @brief    Returns true if key has just been released
-     @param    code  The fx-CGxx key code.
+     @param    keycode  The fx-CGxx key code.
      
      keyUpdate required before using this function.
      */
-    bool FXCG_isKeyReleased(FXCG_TKeyCode code);
+    bool FXCG_isKeyReleased(FXCG_TKeyCode keycode);
     
 #ifdef __cplusplus
 }

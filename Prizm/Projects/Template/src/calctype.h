@@ -20,7 +20,12 @@
 
 #pragma once
 
+#ifndef __clang__
 #include <fxcg/display.h>
+#else
+#include <display.h>
+#endif
+
 #include <stdint.h>
 
 typedef struct CalcTypeFont {

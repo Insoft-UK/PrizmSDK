@@ -20,26 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef __clang__
-#define AddIn_main main
-#endif
+#include "base.h"
 
 #include <stdio.h>
 #include <stdint.h>
 
-#include <fxcg/display.h>
-#include <fxcg/keyboard.h>
-#include <fxcg/system.h>
-
 #include "graphics.h"
-#include "calctype.h"
-
-#include "fonts/consolas.h"
-#include "fonts/garamond.h"
-#include "fonts/commodore.h"
-#include "fonts/arial.h"
-
-#define true 1
+#include "key.h"
 
 void AddIn_quit(void)
 {
@@ -66,19 +53,8 @@ void AddIn_setup(void)
 int AddIn_main(int argc, const char * argv[])
 {
     int key;
-    
-    AddIn_setup();
-
-    /*
-     The GetKey function can interrupt add-in execution and transfer
-     control back to the OS. When a new add-in is launched, the currently
-     running one is discarded, and the new add-in is loaded and executed.
-     
-     You should *NEVER* exit main in an add-in. If you do, running the
-     add-in again (until another add-in is executed) will result in a blank
-     screen before returning to the MENU screen. To prevent this, it’s best
-     to use a while loop to keep the add-in running.
-     */
+    int row, col;
+    unsigned short keycode = 0;
     
     TScrollbar scrollbar = {
         .I1 = 0, .I5 = 0,
@@ -89,17 +65,69 @@ int AddIn_main(int argc, const char * argv[])
         .indicatorPosition = 5
     };
     
+    AddIn_setup();
+
+    /*
+     The GetKey or GetKeyWait_OS function can interrupt add-in execution
+     and transfer control back to the OS. When a new add-in is launched, the
+     currently running one is discarded, and the new add-in is loaded and
+     executed.
+     
+     You should *NEVER* exit main in an add-in. If you do, running the
+     add-in again (until another add-in is executed) will result in a blank
+     screen before returning to the MENU screen. To prevent this, it’s best
+     to use a while loop to keep the add-in running.
+     */
+    
+    unsigned char str[256];
+    
+    TBdispFillArea fillArea = {
+        .mode = AreaModeColor,
+        .x1 = 0,
+        .y1 = 0,
+        .x2 = 383,
+        .y2 = 239
+    };
+    
+    FXCG_keyReset();
+    
     while (true) {
-        CalcType_DrawString(&Garamond, "Press MENU to exit", 0, 22 + 15, COLOR_BLACK);
-        CalcType_DrawString(&Consolas, "You should *NEVER* exit main in an add-in.", 0, 22 + Garamond.height + 9, 0);
+        Bdisp_AreaClr(&fillArea, TargetVRAM, COLOR_WHITE);
         
         Scrollbar(&scrollbar);
+        DisplayStatusArea();
+        
+        // Display the keycode in HEX
+        WordToHex((unsigned short)keycode, str);
+        Bdisp_MMPrint(140, 0, str, 0, 0xFFFFFFFF, 0, 0, COLOR_BLACK, COLOR_WHITE, 1, 0);
+        
+        
+        Bdisp_PutDisp_DD();
       
-        GetKey(&key);
+        FXCG_keyUpdate();
+        if (FXCG_isKeyPressed(K_Menu)) {
+            GetKey(&key);
+        }
         
-        if (key == KEY_PRGM_RIGHT) scrollbar.barWidth++;
         
+        
+        if (FXCG_isKeyPressed(K_Left) && scrollbar.barWidth > 6) scrollbar.barWidth--;
+        if (FXCG_isKeyPressed(K_Right)) scrollbar.barWidth++;
+//        if (key.pressed == KEY_PRGM_UP && scrollbar.indicatorPosition > 0) scrollbar.indicatorPosition--;
+//        if (key.pressed == KEY_PRGM_DOWN && scrollbar.indicatorPosition < scrollbar.indicatorMaximum) scrollbar.indicatorPosition++;
+//        if (key.pressed == KEY_PRGM_F1 && scrollbar.indicatorMaximum > 1) scrollbar.indicatorMaximum--;
+//        if (key.pressed == KEY_PRGM_F6) scrollbar.indicatorMaximum++;
+//        
+//        if (key.pressed == KEY_PRGM_F2 && scrollbar.indicatorHeight > 1) scrollbar.indicatorHeight--;
+//        if (key.pressed == KEY_PRGM_F5) scrollbar.indicatorHeight++;
+        
+        if (scrollbar.indicatorPosition > scrollbar.indicatorMaximum) {
+            scrollbar.indicatorPosition = scrollbar.indicatorMaximum;
+        }
+        
+        OS_InnerWait_ms(10);
     }
     
     return 0;
 }
+

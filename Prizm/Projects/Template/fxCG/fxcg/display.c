@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <fxcg/display.h>
+#include <display.h>
 #include <string.h>
 
 extern int _fxCG_KMI_Shift;
@@ -565,9 +565,9 @@ void PrintCXY( int x, int y, const char *text, int mode, int P5, int color, int 
     }
     
     TBdispFillArea area = {
-        .x1 = x, .y1 = y, .x2 = x + GetTextSize((unsigned char *)text, FontSize24pt) - 1, .y2 = y + 23
+        .x1 = x, .y1 = y, .x2 = x + GetTextSize((unsigned char *)text, FontSize24pt) - 1, .y2 = y + 23, .mode = AreaModeColor
     };
-    Bdisp_AreaClr(&area, 0x01, bgcolor);
+    Bdisp_AreaClr(&area, TargetVRAM, bgcolor);
     DrawText(x, y, text, color, FontSize24pt);
 }
 
@@ -631,7 +631,7 @@ void PrintMini( int *x, int *y, const char *MB_string, int mode_flags, unsigned 
 
 void PrintMiniMini( int *x, int *y, const char *MB_string, int mode1, char color, int mode2 )
 {
-    unsigned short colors[8] = {0x0000, 0x001F, 0x07E0, 0x07FF, 0xF800, 0xF81F, 0xFFE0, 0xFFFF};
+    static unsigned short colors[8] = {0x0000, 0x001F, 0x07E0, 0x07FF, 0xF800, 0xF81F, 0xFFE0, 0xFFFF};
     if (mode1 & 0x1) {
         DrawText(*x, *y + 24, MB_string, colors[color], FontSize10pt);\
         return;

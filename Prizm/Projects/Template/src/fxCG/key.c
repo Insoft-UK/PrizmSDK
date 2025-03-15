@@ -33,68 +33,65 @@
  to indicate the key press event. Conversely, when a key is released, the corresponding
  bit or bits are cleared to indicate the key release event.
  
-                                                                    Row : 16-bit (reg 0-4)
+                                                                           8-bit (reg 0-8) Row
      +-----------------------------------------------------------------------------------+
-     |   [F1]      [F2]      [F3]      [F4]      [F5]      [F6]                          | 9 = (4)
+     |   [F1]      [F2]      [F3]      [F4]      [F5]      [F6]                          | 9
      |                                                                                   |
-     |   [SHIFT]   [OPTN]    [VARS]    [MENU]    [◂]       [▴]                           | 8 = (4)
+     |   [SHIFT]   [OPTN]    [VARS]    [MENU]    [◂]       [▴]                           | 8
      |                                                                                   |
-     |   [ALPHA]   [𝓍²]      [x√]      [EXIT]    [▾]       [▸]                           | 7 = (3)
+     |   [ALPHA]   [𝓍²]      [x√]      [EXIT]    [▾]       [▸]                           | 7
      |                                                                                   |
-     |   [X,T,θ]   [log]     [ln]      [sin]     [cos]     [tan]                         | 6 = (3)
+     |   [X,T,θ]   [log]     [ln]      [sin]     [cos]     [tan]                         | 6
      |                                                                                   |
-     |   [ab/c]    [S↔D]     [(]       [)]       [,]       [→]                           | 5 = (2)
+     |   [ab/c]    [S↔D]     [(]       [)]       [,]       [→]                           | 5
      |                                                                                   |
-     |   [7]       [8]       [9]       [DEL]                                             | 4 = (2)
+     |   [7]       [8]       [9]       [DEL]                                             | 4
      |                                                                                   |
-     |   [4]       [5]       [6]       [×]       [÷]                                     | 3 = (1)
+     |   [4]       [5]       [6]       [×]       [÷]                                     | 3
      |                                                                                   |
-     |   [1]       [2]       [3]       [+]       [-]                                     | 2 = (1)
+     |   [1]       [2]       [3]       [+]       [-]                                     | 2
      |                                                                                   |
-     |   [0]       [.]       [EXP]     [(‒)]     [EXE]                                   | 1 = (0)
+     |   [0]       [.]       [EXP]     [(‒)]     [EXE]                                   | 1
      |                                                                                   |
-     |                                                               [AC/ON]   [RESET]   | 0 = (0)
+     |                                                               [AC/ON]   [RESET]   | 0
      +----------------------------------------------------------------------------------+
   Col    7         6         5         4         3         2         1         0
  
- *Bit    8         9         10        11        12        13        14       15
-**Bit    0         1         2         3         4         5         6        7
- 
- * When Row is odd
-** When Row is even
+  Bit    0         1         2         3         4         5         6         7
  
  
  */
 
+#ifndef __clang__
 #define FXCG_KEY_REG 0xA44B0000
+#else
+extern unsigned char _fxCG_0xA44B0000[12];
+#define FXCG_KEY_REG _fxCG_0xA44B0000
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 
-static const uint16_t *_keyboardRegister = (uint16_t *)FXCG_KEY_REG;
+static const uint8_t *_keyboardRegister = FXCG_KEY_REG;
 
 static struct {
-    uint16_t held[5];
-    uint16_t last[5];   // Key/s that were last held down.
-    uint16_t pressed[5];
-    uint16_t released[5];
+    uint8_t held[10];
+    uint8_t last[10];   // Key/s that were last held down.
+    uint8_t pressed[10];
+    uint8_t released[10];
 } _key = {
-    {0,0,0,0,0},
-    {0,0,0,0,0},
-    {0,0,0,0,0},
-    {0,0,0,0,0}
+    {0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0}
 };
 
-uint16_t* FXCG_keyReg(void)
-{
-    return (uint16_t *)FXCG_KEY_REG;
-}
 
 void FXCG_keyUpdate(void)
 {
-    for (int i=0; i<5; i++) {
+    for (int i=0; i<10; i++) {
         _key.held[i] = _keyboardRegister[i];
         
         _key.pressed[i] = ~_key.last[i] & _key.held[i];
@@ -106,7 +103,7 @@ void FXCG_keyUpdate(void)
 
 void FXCG_keyReset(void)
 {
-    for (int i=0; i<5; i++) {
+    for (int i=0; i<10; i++) {
         _key.held[i] = 0;
         _key.last[i] = 0;
         _key.pressed[i] = 0;
@@ -114,28 +111,12 @@ void FXCG_keyReset(void)
     }
 }
 
-//static uint16_t FXCG_keyCode(const uint16_t* reg)
-//{
-//    for (int row = 0; row < 9; row++) {
-//        int word = row >> 1;
-//        if (!reg[word]) continue;
-//        
-//        for (int col = 0; col < 8; col++) {
-//            int bit = col + 8 * ( row & 1 );
-//            if (reg[word] & (1 << bit))
-//                return (uint16_t)((col + 1) * 10 + row);
-//        }
-//    }
-//
-//    return 0;
-//}
-
-uint16_t *FXCG_keyHeld(void)
+uint8_t *FXCG_keyHeld(void)
 {
     return _key.held;
 }
 
-uint16_t *FXCG_keyPessed(void)
+uint8_t *FXCG_keyPessed(void)
 {
     return _key.pressed;
 }
@@ -145,31 +126,34 @@ uint16_t *FXCG_keyPessed(void)
  @param    keycode  The fx-CGxx key code.
  @param    data The status data of the keyboard.
  */
-static bool FXCG_isKeyHold(FXCG_TKeyCode code, const uint16_t *data)
+static bool FXCG_isKeyHold(FXCG_TKeyCode keycode, const uint8_t *data)
 {
-    int row = code % 10;
-    int col = code / 10 - 1;
+    int row = keycode % 10;
+    int col = keycode / 10 - 1;
     
     int word = row >> 1;
-    int bit = col + 8 * ( row & 1 );
+    int bit = 7 - col;
     
     return (0 != (data[word] & 1 << bit));
 }
 
 
-bool FXCG_isKeyHeld(FXCG_TKeyCode code)
+bool FXCG_isKeyHeld(FXCG_TKeyCode keycode)
 {
-    return FXCG_isKeyHold(code, _keyboardRegister);
+    return FXCG_isKeyHold(keycode, _keyboardRegister);
 }
 
 
-bool FXCG_isKeyPressed(FXCG_TKeyCode code)
+bool FXCG_isKeyPressed(FXCG_TKeyCode keycode)
 {
-    return FXCG_isKeyHold(code, _key.pressed);
+    return FXCG_isKeyHold(keycode, _key.pressed);
 }
 
 
-bool FXCG_isKeyReleased(FXCG_TKeyCode code)
+bool FXCG_isKeyReleased(FXCG_TKeyCode keycode)
 {
-    return FXCG_isKeyHold(code, _key.released);
+#ifdef DEBUG
+    printf("released: %d\n", FXCG_isKeyHold(keycode, _key.released));
+#endif
+    return FXCG_isKeyHold(keycode, _key.released);
 }

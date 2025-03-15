@@ -20,11 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef graphics_h
-#define graphics_h
+#ifndef __FXCG_GRAPHICS_H
+#define __FXCG_GRAPHICS_H
 
+#ifndef __clang__
 #include <fxcg/display.h>
-#include "types.h"
+#else
+#include <display.h>
+#endif
+
+#include <stdint.h>
 
 //#define FXCG_drawPixel Bdisp_SetPoint_VRAM
 

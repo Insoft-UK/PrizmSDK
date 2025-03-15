@@ -1,7 +1,6 @@
 // The MIT License (MIT)
 //
 // Copyright (c) 2025 Insoft. All rights reserved.
-// Originaly created 2023
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +22,12 @@
 
 #include <string.h>
 
-#include <fxcg/keyboard.h>
-#include <fxcg/display.h>
-#include <fxcg/system.h>
+#include <keyboard.h>
+#include <display.h>
+#include <system.h>
 
-
-static unsigned short _fxCG_0xA44B0000[6] = {0,0,0,0,0,0}; // keyboard_register
+#define FXCG_KEY_REG _fxCG_0xA44B0000
+unsigned char _fxCG_0xA44B0000[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; // keyboard_register
 
 int _fxCG_KMI_Shift = 0;
 int _fxCG_KMI_Alpha = 0;
@@ -36,49 +35,63 @@ int _fxCG_KMI_Clip = 0;
 
 // MARK: - macOS Keyboard Simulator Functions
 
+
 void fxCG_KeyDown(int keyCode) {
     int row = keyCode % 10;
     int col = keyCode / 10 - 1;
     
-    int word = row >> 1;
-    int bit = col + 8 * ( row & 1 );
+    int bit = 7 - col;
     
-    _fxCG_0xA44B0000[word] |= 1 << bit;
+    _fxCG_0xA44B0000[row] |= 1 << bit;
 }
 
 void fxCG_KeyUp(int keyCode) {
     int row = keyCode % 10;
     int col = keyCode / 10 - 1;
     
-    int word = row >> 1;
-    int bit = col + 8 * ( row & 1 );
+    int bit = 7 - col;
     
-    _fxCG_0xA44B0000[word] &= ~(1 << bit);
+    FXCG_KEY_REG[row] &= ~(1 << bit);
+}
+
+void fxCG_KeyClearAll(void) {
+    for (int i = 0; i < 10; i++) {
+        _fxCG_0xA44B0000[i] = 0;
+    }
 }
 
 // MARK: - Keyboard Functions
 
 int Keyboard_PutKeycode(int x, int y, int keycode)
 {
-    int word = y >> 1;
-    int bit = x + 8 * ( y & 1 );
+    int bit = 7 - x;
     
     if (keycode)
-        _fxCG_0xA44B0000[word] |= 1 << bit;
+        FXCG_KEY_REG[y] |= 1 << bit;
     else
-        _fxCG_0xA44B0000[word] &= ~(1 << bit);
+        FXCG_KEY_REG[y] &= ~(1 << bit);
     
-    return _fxCG_0xA44B0000[word];
+    return FXCG_KEY_REG[y];
 }
 
 int Keyboard_SpyMatrixCode(char *column, char *row)
 {
-    int r = *row;
-    int c = *column;
+    const unsigned char *reg = _fxCG_0xA44B0000;
     
-    int word = r >> 1;
-    int bit = c + 8 * ( r & 1 );
-    return _fxCG_0xA44B0000[word];
+    for (int r = 0; r < 10; r++) {
+        if (!reg[r]) continue;
+        
+        for (int c = 0; c < 8; c++) {
+            int bit = 7 - c;
+            if (reg[r] & (1 << bit)) {
+                *column = c + 1;
+                *row = r;
+                return ((c + 1) * 10 + r);
+            }
+        }
+    }
+    
+    return 0;
 }
 
 static const unsigned short CC[] = {
@@ -242,18 +255,18 @@ int GetKey( int *key )
 
 
 
-int GetKeyWait_OS(int* column, int* row, int type_of_waiting, int timeout_period, int menu, unsigned short* keycode )
+int GetKeyWait_OS(int *column, int *row, int type_of_waiting, int timeout_period, int menu, unsigned short* keycode )
 {
     unsigned int time = 0;
     
     if (timeout_period < 0 || timeout_period > 3600) timeout_period = 0;
     
     do {
-        int key = PRGM_GetKey();
-        if (key) {
-            *keycode = key + 1;
-            *column = key / 10;
-            *row = key % 10 + 1;
+        char c, r;
+        if (Keyboard_SpyMatrixCode(&c, &r)) {
+            *keycode = c << 8 | (r + 1);
+            *column = c;
+            *row = r + 1;
             return KEYREP_KEYEVENT;
         }
         
@@ -261,24 +274,25 @@ int GetKeyWait_OS(int* column, int* row, int type_of_waiting, int timeout_period
         
         OS_InnerWait_ms(10);
         
-        if (type_of_waiting == KEYWAIT_HALTON_TIMERON)
-            if (++time * 100 >= timeout_period) return KEYWAIT_HALTON_TIMERON;
+        if (type_of_waiting == KEYWAIT_HALTON_TIMERON) {
+            time++;
+            if (time * 100 >= timeout_period) return KEYWAIT_HALTON_TIMERON;
+        }
         
     } while (1);
 }
 
 int PRGM_GetKey(void)
 {
-    const unsigned short *reg = _fxCG_0xA44B0000;
+    const unsigned char *reg = _fxCG_0xA44B0000;
     
-    for (int row = 0; row < 9; row++) {
-        int word = row >> 1;
-        if (!reg[word]) continue;
+    for (int r = 0; r < 10; r++) {
+        if (!reg[r]) continue;
         
-        for (int col = 0; col < 8; col++) {
-            int bit = col + 8 * ( row & 1 );
-            if (reg[word] & (1 << bit))
-                return ((col + 1) * 10 + row);
+        for (int c = 0; c < 8; c++) {
+            int bit = 7 - c;
+            if (reg[r] & (1 << bit))
+                return ((c + 1) * 10 + r);
         }
     }
     

@@ -20,47 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <misc.h>
-#include <stdbool.h>
+#import "ViewController.h"
+#import "Scene.h"
 
-int ItoA_10digit(int value, void *result)
-{
-    unsigned char *s = (unsigned char *)result;
-    bool isNeg=false;
-    if(value < 0)
-        isNeg = true;
-    
-    int idx = 0;
-    do {
-        int j = value % 10;
-        j = j < 0 ? j * -1 : j ;
-        s[idx++]=j+48;
-        value=value/10;
-    } while (value!=0);
-    if(isNeg)
-        s[idx++]='-';
-    s[idx]='\0';
-    
-    int j = idx-1;
-    int i=0;
-    while (i<j) {
-        char tmp = s[j];
-        s[j] = s[i];
-        s[i] = tmp;
-        i++;
-        j--;
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    // Ensure skView is properly connected
+    if (!self.skView) {
+        NSLog(@"Error: SKView is not connected in Interface Builder");
+        return;
     }
-    
-    return  0;
+
+    SKScene *scene = [[Scene alloc] initWithSize:CGSizeMake(396, 224)];
+    scene.scaleMode = SKSceneScaleModeAspectFill;
+
+    [self.skView presentScene:scene];
 }
 
-void WordToHex(unsigned short value, unsigned char *result)
-{
-    static char hex[] = "0123456789ABCDEF";
-
-    result[0] = hex[(value >> 12) & 0xF];  // Extract highest 4 bits
-    result[1] = hex[(value >> 8)  & 0xF];  // Extract next 4 bits
-    result[2] = hex[(value >> 4)  & 0xF];  // Extract next 4 bits
-    result[3] = hex[value & 0xF];          // Extract lowest 4 bits
-    result[4] = '\0';                      // Null-terminate the string
+- (id)representedObject {
+    return [super representedObject];
 }
+
+- (void)setRepresentedObject:(id)representedObject {
+    [super setRepresentedObject:representedObject];
+
+    // Update the view, if already loaded.
+}
+
+@end

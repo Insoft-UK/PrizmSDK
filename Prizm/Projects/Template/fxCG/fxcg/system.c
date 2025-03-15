@@ -1,7 +1,6 @@
 // The MIT License (MIT)
 //
 // Copyright (c) 2025 Insoft. All rights reserved.
-// Originaly created 2023
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <fxcg/system.h>
+#include <system.h>
 #include <_time.h>
 
 static void SleepMilliseconds(int milliseconds) {

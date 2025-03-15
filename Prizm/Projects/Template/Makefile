@@ -32,7 +32,6 @@ endif
 
 ADDITIONAL_INCLUDES := src/fxCG
 INCLUDES += $(ADDITIONAL_INCLUDES)
-
 #---------------------------------------------------------------------------------
 # options for code and add-in generation
 #---------------------------------------------------------------------------------
