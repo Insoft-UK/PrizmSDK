@@ -168,6 +168,7 @@ extern "C" {
     int locate_OS(int X, int y);
     void Cursor_SetFlashOn(unsigned char cursor_type);
     void Cursor_SetFlashOff(void);
+    int Cursor_SetPosition(int c, int r);
     int SetCursorFlashToggle(int);
     void Keyboard_CursorFlash(void);
     

@@ -74,7 +74,7 @@ extern unsigned char _fxCG_0xA44B0000[12];
 #include <stdbool.h>
 #include <string.h>
 
-static const uint8_t *_keyboardRegister = FXCG_KEY_REG;
+static const uint8_t *_keyboardRegister = (const uint8_t *)FXCG_KEY_REG;
 
 static struct {
     uint8_t held[10];

@@ -234,7 +234,10 @@ int GetKey( int *key )
     int keycode;
     *key = 0;
     
+    extern void fxCG_DrawCursor(void);
     do {
+        fxCG_DrawCursor();
+        
         keycode = PRGM_GetKey();
         OS_InnerWait_ms(1000);
     } while (!keycode);

@@ -46,24 +46,13 @@ void AddIn_setup(void)
     Bdisp_EnableColor(ColorModeFull);
     
     char indexColor = TEXT_COLOR_WHITE;
-    DefineStatusAreaFlags(3, SAF_BATTERY | SAF_TEXT | SAF_GLYPH | SAF_ALPHA_SHIFT, &indexColor, &indexColor);
+    DefineStatusAreaFlags(3, SAF_BATTERY , &indexColor, &indexColor);
     EnableStatusArea(StatusAreaEnabled);
 }
 
 int AddIn_main(int argc, const char * argv[])
 {
     int key;
-    int row, col;
-    unsigned short keycode = 0;
-    
-    TScrollbar scrollbar = {
-        .I1 = 0, .I5 = 0,
-        .barHeight = 150, .barWidth = 6,
-        .barTop = 0, .barLeft = 0,
-        .indicatorHeight = 50,
-        .indicatorMaximum = 100,
-        .indicatorPosition = 5
-    };
     
     AddIn_setup();
 
@@ -79,46 +68,21 @@ int AddIn_main(int argc, const char * argv[])
      to use a while loop to keep the add-in running.
      */
     
-    unsigned char str[256];
     
-    TBdispFillArea fillArea = {
-        .mode = AreaModeColor,
-        .x1 = 0,
-        .y1 = 0,
-        .x2 = 383,
-        .y2 = 239
-    };
+
     
-    FXCG_keyReset();
+    unsigned char cursor_type = 0;
+    
+    locate_OS(1, 7);
+    
+    Cursor_SetFlashOn(0);
     
     while (true) {
-        Bdisp_AreaClr(&fillArea, TargetVRAM, COLOR_WHITE);
         
-        Scrollbar(&scrollbar);
-        DisplayStatusArea();
+        GetKey(&key);
         
-        Bdisp_PutDisp_DD();
-      
-        FXCG_keyUpdate();
-        if (FXCG_isKeyPressed(K_Menu)) {
-            GetKey(&key);
-        }
-        
-        if (FXCG_isKeyPressed(K_Left) && scrollbar.barWidth > 6) scrollbar.barWidth--;
-        if (FXCG_isKeyPressed(K_Right)) scrollbar.barWidth++;
-        if (FXCG_isKeyPressed(K_Up) && scrollbar.indicatorPosition > 0) scrollbar.indicatorPosition--;
-        if (FXCG_isKeyPressed(K_Down) && scrollbar.indicatorPosition < scrollbar.indicatorMaximum) scrollbar.indicatorPosition++;
-        if (FXCG_isKeyPressed(K_F1) && scrollbar.indicatorMaximum > 1) scrollbar.indicatorMaximum--;
-        if (FXCG_isKeyPressed(K_F6)) scrollbar.indicatorMaximum++;
-        
-        if (FXCG_isKeyPressed(K_F2) && scrollbar.indicatorHeight > 1) scrollbar.indicatorHeight--;
-        if (FXCG_isKeyPressed(K_F5)) scrollbar.indicatorHeight++;
-        
-        if (scrollbar.indicatorPosition > scrollbar.indicatorMaximum) {
-            scrollbar.indicatorPosition = scrollbar.indicatorMaximum;
-        }
-        
-        OS_InnerWait_ms(10);
+        if (key == 0x7542 && cursor_type <= 12) Cursor_SetFlashOn(++cursor_type);
+        if (key == 0x7547 && cursor_type > 0) Cursor_SetFlashOn(--cursor_type);
     }
     
     return 0;

@@ -34,10 +34,14 @@ static struct {
 };
 
 static struct {
-    int x;  /// x Must be in range of [0,21]
-    int y;  /// y Must be in range
+    unsigned int c;  /// Must be in range of [0,21]
+    unsigned int r;  /// Must be in range [0,8]
+    unsigned char flashStyle;
+    int on;
 } _fxCG_Cursor = {
-    .x = 0, .y = 0
+    .c = 0, .r = 0,
+    .flashStyle = 0,
+    .on = 0
 };
 
 int _fxCG_StatusArea = 1;
@@ -51,6 +55,7 @@ static color_t _SecondaryVRAM[LCD_WIDTH_PX * LCD_HEIGHT_PX];
 
 static unsigned short _fxCG_0xFD801460 = 0xFFFF;
 static int _fxCG_FrameMode = 0;
+
 
 
 // MARK: -
@@ -100,6 +105,23 @@ void *GetDDAddress(void)
 #include "CASIO/fxCG50_24pt0xE5XX.h"
 #include "CASIO/fxCG50_24pt0xE6XX.h"
 
+void fxCG_DrawCursor(void)
+{
+    static int count = 0;
+    color_t color = count++ & 0b1 ? COLOR_WHITE : COLOR_BLACK;
+    color_t *DD = _DD;
+    DD += 6 + (_fxCG_Cursor.c * 18);
+    DD += (_fxCG_Cursor.r * 24) * 396;
+    
+    int w;
+    w = _fxCG_Cursor.flashStyle == 0x10 ? 5 : 3;
+    for (int y = 0; y < 22; y++) {
+        for (int x = 0; x < 3; x++) {
+            
+            DD[x + y * 396] = color;
+        }
+    }
+}
 
 unsigned short fxCG_SAF(void)
 {
@@ -480,7 +502,7 @@ void Bdisp_Rectangle(int x1, int y1, int x2, int y2, char color)
 void Bdisp_PutDisp_DD(void) {
     DisplayStatusArea();
     
-    for (int y = 0; y < 240; y++) {
+    for (int y = 0; y < 224; y++) {
         for (int x = 0; x < 396; x++) {
             if (y >= LCD_HEIGHT_PX || (x < 6 || x >= 390)) {
                 _DD[x + y * 396] = _fxCG_0xFD801460;
@@ -540,12 +562,30 @@ int locate_OS( int x, int y )
 {
     if (x < 1 || x > 21) return 0;
     if (y < 1 || y > 8) return 0;
-    _fxCG_Cursor.x = x;
-    _fxCG_Cursor.y = y;
+    _fxCG_Cursor.c = x;
+    _fxCG_Cursor.r = y;
     
     return 1;
 }
 
+void Cursor_SetFlashOn(unsigned char cursor_type)
+{
+    _fxCG_Cursor.flashStyle = cursor_type;
+    _fxCG_Cursor.on = 1;
+}
+void Cursor_SetFlashOff(void)
+{
+    _fxCG_Cursor.on = 0;
+}
+
+int SetCursorFlashToggle(int p1)
+{
+    return 0;
+}
+
+void Keyboard_CursorFlash(void)
+{
+}
 
 
 // MARK: - Character printing syscalls:
@@ -642,8 +682,8 @@ void PrintMiniMini( int *x, int *y, const char *MB_string, int mode1, char color
 
 void Print_OS(const char* msg, int invers, int zero2)
 {
-    PrintCXY(_fxCG_Cursor.x * 18, _fxCG_Cursor.y * 24, msg, invers ? 0x01 : 0x00, -1, 0, 0xFFFF, 1, 0);
-    _fxCG_Cursor.x = fxCG_Range(0, 20, _fxCG_Cursor.x + 1);
+    PrintCXY(_fxCG_Cursor.c * 18, _fxCG_Cursor.r * 24, msg, invers ? 0x01 : 0x00, -1, 0, 0xFFFF, 1, 0);
+    _fxCG_Cursor.c = fxCG_Range(0, 20, _fxCG_Cursor.c + 1);
 }
 
 void Bdisp_MMPrintRef(int*x, int*y, unsigned char *s, int mode, int xmax, int P6, int P5, int color, int P9, int P10, int P11)
