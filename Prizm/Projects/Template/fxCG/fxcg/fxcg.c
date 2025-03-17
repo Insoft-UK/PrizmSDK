@@ -20,49 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "font.h"
-#include "graphics.h"
+#include "fxcg.h"
 
-int FXCG_drawGlyph(short x, short y, unsigned char c, color_t color, FXCG_TFont *font)
-{
-    if (c < font->first || c > font->last) {
-        return 0;
-    }
-    
-    FXCG_TGlyph *glyph = &font->glyph[(int)c - font->first];
-    
-    int height = glyph->height;
-    int width = glyph->width;
-   
-    x += glyph->dX;
-    y += glyph->dY + font->yAdvance;
-    
-    uint8_t *bitmap = font->bitmap + glyph->offset;
-    uint8_t bitPosition = 1 << 7;
-    while (height--) {
-        for (int xx=0; xx<width; xx++) {
-            if (!bitPosition) {
-                bitPosition = 1 << 7;
-                bitmap++;
-            }
-            if (*bitmap & bitPosition) {
-                FXCG_drawPixel(x + xx, y, color);
-            }
-            bitPosition >>= 1;
-        }
-        y++;
-    }
-    return glyph->xAdvance;
-}
+#include <display.h>
 
-int FXCG_drawString(short x, short y, const char *s, color_t color, FXCG_TFont *font)
-{
-    char *c = (char *)s;
-    
-    while (*c) {
-        x += FXCG_drawGlyph(x, y, (unsigned char)*c, color, font);
-        c++;
-    }
-    return x;
-}
+fxCG_DDRegister _fxCG_DDRegister = {
+    .B = 1 /// 1 = Enable 8 color mode
+};
 
+
+
+int _fxCG_StatusArea = 1;
+unsigned short _fxCG_SAF = SAF_BATTERY | SAF_ALPHA_SHIFT;
+
+unsigned char _fxCG_0xA44B0000[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; // keyboard_register
+
+int _fxCG_KMI_Shift = 0;
+int _fxCG_KMI_Alpha = 0;
+int _fxCG_KMI_Clip = 0;

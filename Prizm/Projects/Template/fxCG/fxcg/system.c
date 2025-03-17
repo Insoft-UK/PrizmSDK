@@ -21,13 +21,28 @@
 // SOFTWARE.
 
 #include <system.h>
-#include <_time.h>
+#include <time.h>
+#include <errno.h>
 
-static void SleepMilliseconds(int milliseconds) {
-    struct timespec req;
-    req.tv_sec = milliseconds / 1000;             // seconds portion
-    req.tv_nsec = (milliseconds % 1000) * 1000000;  // nanoseconds portion
-    nanosleep(&req, 0);
+static int msleep(long msec)
+{
+    struct timespec ts;
+    int res;
+
+    if (msec < 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    ts.tv_sec = msec / 1000;
+    ts.tv_nsec = (msec % 1000) * 1000000;
+
+    do {
+        res = nanosleep(&ts, &ts);
+    } while (res && errno == EINTR);
+
+    return res;
 }
 
 static void Callback(void)
@@ -38,7 +53,7 @@ void (*_callback)(void) = Callback;
 
 void OS_InnerWait_ms(int ms)
 {
-    SleepMilliseconds(ms);
+    msleep(ms);
 }
 
 int MB_ElementCount(char* buf)

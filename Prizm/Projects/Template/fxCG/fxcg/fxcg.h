@@ -20,20 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef image_h
-#define image_h
+#ifndef fxcg_h
+#define fxcg_h
 
 #include <stdint.h>
+#include <stdbool.h>
+
+#include <display.h>
+#include <keyboard.h>
+
+#define FXCG_KEY_REG _fxCG_0xA44B0000
+#define FXCG_DD_REG  _fxCG_DDRegister
+
+typedef struct {
+    unsigned short B : 1;
+} fxCG_DDRegister;
+
+extern fxCG_DDRegister _fxCG_DDRegister;
+
+extern int _fxCG_KMI_Shift;
+extern int _fxCG_KMI_Alpha;
+extern int _fxCG_KMI_Clip;
+
+extern int _fxCG_StatusArea;
+extern unsigned short _fxCG_SAF;
+
+extern unsigned char _fxCG_0xA44B0000[12];
 
 #ifdef __cplusplus
 extern "C" {
 #endif
     
-    void Image_OrderedDitherRGB(uint8_t *image, const int width, const int height);
-    void Image_FloydSteinbergDitherRGB(uint8_t *image, const int width, const int height);
+    void *GetDDAddress(void);
+    uint16_t fxCG_SAF(void);
     
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* image_h */
+#endif /* fxcg_h */

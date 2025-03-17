@@ -22,7 +22,7 @@ ifndef SOURCES
 	SOURCES := src
 endif
 
-ADDITIONAL_SOURCE := src/fxCG
+ADDITIONAL_SOURCE :=
 SOURCES += $(ADDITIONAL_SOURCE)
 
 DATA		:=	data
@@ -30,7 +30,7 @@ ifndef INCLUDES
 	INCLUDES :=
 endif
 
-ADDITIONAL_INCLUDES := src/fxCG
+ADDITIONAL_INCLUDES :=
 INCLUDES += $(ADDITIONAL_INCLUDES)
 #---------------------------------------------------------------------------------
 # options for code and add-in generation

@@ -15,6 +15,10 @@ lib/libc.a: lib libc/libc.a
 
 libc/libc.a:
 	make -C libc
+	
+install:
+	cp lib/libfxcg.a /Applications/CASIO/PrizmSDK/lib/
+	cp -a include/fxcg/*.h /Applications/CASIO/PrizmSDK/include/fxcg
 
 clean:
 	rm lib/*.a

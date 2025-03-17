@@ -25,9 +25,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "graphics.h"
-#include "key.h"
-
 void AddIn_quit(void)
 {
     FrameColor(FrameModeColor, COLOR_WHITE);
@@ -69,20 +66,17 @@ int AddIn_main(int argc, const char * argv[])
      */
     
     
-
-    
     unsigned char cursor_type = 0;
     
-    locate_OS(1, 7);
-    
-    Cursor_SetFlashOn(0);
+    Cursor_SetPosition(0, 7);
+    Cursor_SetFlashOn(CursorTypeNormal);
     
     while (true) {
         
         GetKey(&key);
         
-        if (key == 0x7542 && cursor_type <= 12) Cursor_SetFlashOn(++cursor_type);
-        if (key == 0x7547 && cursor_type > 0) Cursor_SetFlashOn(--cursor_type);
+        if (key == KEY_CTRL_UP && cursor_type <= 12) Cursor_SetFlashOn(++cursor_type);
+        if (key == KEY_CTRL_DOWN && cursor_type > 0) Cursor_SetFlashOn(--cursor_type);
     }
     
     return 0;

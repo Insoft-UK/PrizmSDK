@@ -26,12 +26,8 @@
 #include <display.h>
 #include <system.h>
 
-#define FXCG_KEY_REG _fxCG_0xA44B0000
-unsigned char _fxCG_0xA44B0000[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; // keyboard_register
+#include "fxcg.h"
 
-int _fxCG_KMI_Shift = 0;
-int _fxCG_KMI_Alpha = 0;
-int _fxCG_KMI_Clip = 0;
 
 // MARK: - macOS Keyboard Simulator Functions
 
@@ -42,7 +38,7 @@ void fxCG_KeyDown(int keyCode) {
     
     int bit = 7 - col;
     
-    _fxCG_0xA44B0000[row] |= 1 << bit;
+    FXCG_KEY_REG[row] |= 1 << bit;
 }
 
 void fxCG_KeyUp(int keyCode) {
@@ -56,7 +52,7 @@ void fxCG_KeyUp(int keyCode) {
 
 void fxCG_KeyClearAll(void) {
     for (int i = 0; i < 10; i++) {
-        _fxCG_0xA44B0000[i] = 0;
+        FXCG_KEY_REG[i] = 0;
     }
 }
 
@@ -223,8 +219,9 @@ static const unsigned short CC_Shift[] = {
 
 void PRGM_GetKey_OS(unsigned char* p)
 {
-    memcpy(p, _fxCG_0xA44B0000, 12);
+    memcpy(p, FXCG_KEY_REG, 12);
 }
+
 
 int GetKey( int *key )
 {
@@ -234,12 +231,9 @@ int GetKey( int *key )
     int keycode;
     *key = 0;
     
-    extern void fxCG_DrawCursor(void);
     do {
-        fxCG_DrawCursor();
-        
         keycode = PRGM_GetKey();
-        OS_InnerWait_ms(1000);
+        OS_InnerWait_ms(10);
     } while (!keycode);
     
     // CR
@@ -287,7 +281,7 @@ int GetKeyWait_OS(int *column, int *row, int type_of_waiting, int timeout_period
 
 int PRGM_GetKey(void)
 {
-    const unsigned char *reg = _fxCG_0xA44B0000;
+    const unsigned char *reg = FXCG_KEY_REG;
     
     for (int r = 0; r < 10; r++) {
         if (!reg[r]) continue;

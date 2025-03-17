@@ -56,16 +56,10 @@ fi
 mkdir -p ~/sh3eb-toolchain
 cp -a libfxcg ~/sh3eb-toolchain/
 cd ~/sh3eb-toolchain/libfxcg
-make
+make all
 make install
-
-cp lib/*.a /Applications/CASIO/PrizmSDK/lib/
-cp -a toolchain /Applications/CASIO/PrizmSDK/
-cp -a include /Applications/CASIO/PrizmSDK/
 cd ~/sh3eb-toolchain
-cp prizm_rules $LIBFXCG/toolchain
-
-#rm -r ~/sh3eb-toolchain
+rm -r ~/sh3eb-toolchain
 
 read -p "PrizmSDK updated."
 

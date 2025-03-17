@@ -23,29 +23,8 @@
 #include <display.h>
 #include <string.h>
 
-extern int _fxCG_KMI_Shift;
-extern int _fxCG_KMI_Alpha;
-extern int _fxCG_KMI_Clip;
+#include "fxcg.h"
 
-static struct {
-    unsigned short B : 1;
-} _fxCG_DDRegister = {
-    .B = 1 /// 1 = Enable 8 color mode
-};
-
-static struct {
-    unsigned int c;  /// Must be in range of [0,21]
-    unsigned int r;  /// Must be in range [0,8]
-    unsigned char flashStyle;
-    int on;
-} _fxCG_Cursor = {
-    .c = 0, .r = 0,
-    .flashStyle = 0,
-    .on = 0
-};
-
-int _fxCG_StatusArea = 1;
-static unsigned short _fxCG_SAF = SAF_BATTERY | SAF_ALPHA_SHIFT;
 static char _fxCG_StatusArea_ColorA = TEXT_COLOR_WHITE, _fxCG_StatusArea_ColorB = TEXT_COLOR_WHITE;
 
 // DRAM is RGB565 regardless of VRAM RGB565 or RGB111
@@ -56,6 +35,12 @@ static color_t _SecondaryVRAM[LCD_WIDTH_PX * LCD_HEIGHT_PX];
 static unsigned short _fxCG_0xFD801460 = 0xFFFF;
 static int _fxCG_FrameMode = 0;
 
+
+static TCursorSettings _fxCG_CursorSettings = {
+    .cursorX = 0, .cursorY = 0,
+    .cursorFlashFlag = 0,
+    ._unknown = 0
+};
 
 
 // MARK: -
@@ -105,23 +90,6 @@ void *GetDDAddress(void)
 #include "CASIO/fxCG50_24pt0xE5XX.h"
 #include "CASIO/fxCG50_24pt0xE6XX.h"
 
-void fxCG_DrawCursor(void)
-{
-    static int count = 0;
-    color_t color = count++ & 0b1 ? COLOR_WHITE : COLOR_BLACK;
-    color_t *DD = _DD;
-    DD += 6 + (_fxCG_Cursor.c * 18);
-    DD += (_fxCG_Cursor.r * 24) * 396;
-    
-    int w;
-    w = _fxCG_Cursor.flashStyle == 0x10 ? 5 : 3;
-    for (int y = 0; y < 22; y++) {
-        for (int x = 0; x < 3; x++) {
-            
-            DD[x + y * 396] = color;
-        }
-    }
-}
 
 unsigned short fxCG_SAF(void)
 {
@@ -562,20 +530,36 @@ int locate_OS( int x, int y )
 {
     if (x < 1 || x > 21) return 0;
     if (y < 1 || y > 8) return 0;
-    _fxCG_Cursor.c = x;
-    _fxCG_Cursor.r = y;
+    _fxCG_CursorSettings.cursorX = x - 1;
+    _fxCG_CursorSettings.cursorY = y - 1;
     
     return 1;
 }
 
-void Cursor_SetFlashOn(unsigned char cursor_type)
+unsigned int Cursor_GetSettings(TCursorSettings *cursorSettings)
 {
-    _fxCG_Cursor.flashStyle = cursor_type;
-    _fxCG_Cursor.on = 1;
+    memcpy((void *)cursorSettings, &_fxCG_CursorSettings, sizeof(TCursorSettings));
+    return _fxCG_CursorSettings.cursorFlashFlag;
+}
+
+void Cursor_SetFlashOn(TCursorType cursorType)
+{
+    _fxCG_CursorSettings.cursorFlashFlag = cursorType;
+    _fxCG_CursorSettings._uknown = 1;
 }
 void Cursor_SetFlashOff(void)
 {
-    _fxCG_Cursor.on = 0;
+    _fxCG_CursorSettings._uknown = 0;
+}
+
+int Cursor_SetPosition(int x, int y)
+{
+    if (x < 0 || x > 20) return 0;
+    if (y < 0 || y > 7) return 0;
+    _fxCG_CursorSettings.cursorX = x;
+    _fxCG_CursorSettings.cursorY = y;
+    
+    return 1;
 }
 
 int SetCursorFlashToggle(int p1)
@@ -677,13 +661,12 @@ void PrintMiniMini( int *x, int *y, const char *MB_string, int mode1, char color
         return;
     }
     DrawText(*x, *y + 24, MB_string, colors[color], FontSize10pt);
-    
 }
 
 void Print_OS(const char* msg, int invers, int zero2)
 {
-    PrintCXY(_fxCG_Cursor.c * 18, _fxCG_Cursor.r * 24, msg, invers ? 0x01 : 0x00, -1, 0, 0xFFFF, 1, 0);
-    _fxCG_Cursor.c = fxCG_Range(0, 20, _fxCG_Cursor.c + 1);
+    PrintCXY(_fxCG_CursorSettings.cursorX * 18, _fxCG_CursorSettings.cursorY * 24, msg, invers ? 0x01 : 0x00, -1, 0, 0xFFFF, 1, 0);
+    _fxCG_CursorSettings.cursorX = fxCG_Range(0, 20, _fxCG_CursorSettings.cursorX + 1);
 }
 
 void Bdisp_MMPrintRef(int*x, int*y, unsigned char *s, int mode, int xmax, int P6, int P5, int color, int P9, int P10, int P11)
@@ -848,7 +831,7 @@ void DisplayStatusArea(void)
     }
 }
 
-void BatteryIcon( unsigned int p1)
+void BatteryIcon(TBatteryIcon batteryIcon)
 {
     
 }

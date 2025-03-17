@@ -22,6 +22,7 @@
 
 
 #import "DisplayNode.h"
+#import "fxcg.h"
 
 @interface DisplayNode () {
     SKMutableTexture *mutableTexture;
@@ -29,16 +30,13 @@
     SKSpriteNode *battery;
     SKSpriteNode *shift;
     SKSpriteNode *alphaSymbol;
+    SKSpriteNode *cursor;
     NSArray<SKTexture *> *alphaFrames;
 }
 
 @end
 
 @implementation DisplayNode
-
-// External C functions
-extern void *GetDDAddress(void);
-extern UInt16 fxCG_SAF(void);
 
 // Singleton Instance
 + (instancetype)sharedInstance {
@@ -90,6 +88,23 @@ extern UInt16 fxCG_SAF(void);
     shift.position = CGPointMake(-198 + 6 + 18, 112 - 22);
     shift.texture.filteringMode = SKTextureFilteringNearest;
     [display addChild:shift];
+    
+    
+    // Cursor
+    cursor = [SKSpriteNode spriteNodeWithImageNamed:@"Cursor"];
+    cursor.texture.filteringMode = SKTextureFilteringNearest;
+    cursor.anchorPoint = CGPointZero;
+    SKAction *animateCursor = [SKAction repeatActionForever:[SKAction sequence:@[
+        [SKAction unhide],
+        [SKAction waitForDuration:0.5],
+        [SKAction hide],
+        [SKAction waitForDuration:0.5]
+    ]]];
+    [cursor runAction:animateCursor];
+    TCursorSettings cursorSettings;
+    Cursor_GetSettings(&cursorSettings);
+    cursor.position = CGPointMake(-198 + 6 + cursorSettings.cursorX * cursor.size.width, -120 + cursorSettings.cursorY * cursor.size.height + cursor.size.height / 2);
+    [display addChild:cursor];
 }
 
 // Setup Battery Animation
@@ -124,6 +139,42 @@ extern UInt16 fxCG_SAF(void);
     }
     
     UInt16 *pixelData = (UInt16 *)dramPointer;
+    
+    
+    static int cursorFlashFlag = 0;
+    
+    TCursorSettings cursorSettings;
+    Cursor_GetSettings(&cursorSettings);
+    
+    cursor.position = CGPointMake(-198 + 6 + cursorSettings.cursorX * cursor.size.width, -120 + cursorSettings.cursorY * cursor.size.height + cursor.size.height / 2);
+    
+    
+    if (cursorFlashFlag != cursorSettings.cursorFlashFlag) {
+        cursorFlashFlag = cursorSettings.cursorFlashFlag;
+        switch (cursorFlashFlag) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 8:
+            case 11:
+                cursor.texture = [SKTexture textureWithImageNamed:@"Cursor"];
+                break;
+                
+            case 12:
+                cursor.texture = [SKTexture textureWithImageNamed:@"ArrowCursor"];
+                break;
+                
+            default:
+                cursor.texture = [SKTexture textureWithImageNamed:@"FullCursor"];
+                break;
+        }
+        cursor.texture.filteringMode = SKTextureFilteringNearest;
+    }
+    cursor.hidden = (!cursorSettings._uknown);
+    
     
     [mutableTexture modifyPixelDataWithBlock:^(void * _Nullable pixelDataPtr, NSUInteger lengthInBytes) {
         if (!pixelDataPtr) return;

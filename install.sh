@@ -139,7 +139,7 @@ make install
 read -p "Press Enter to continue..."
 
 cd ~/sh3eb-toolchain/libfxcg
-#make CC=/Applications/CASIO/PrizmSDK/sh3eb-elf/bin/sh3eb-elf-gcc
+make CC=/Applications/CASIO/PrizmSDK/sh3eb-elf/bin/sh3eb-elf-gcc
 make
 make install
 
