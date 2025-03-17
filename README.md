@@ -1,3 +1,5 @@
+<img src="img/SDK.png" width="256" height="256"><img src="img/Casio_logo.svg" width="256" height="256">
+
 # Getting started on macOS
 
 This document will walk you through the process of setting up the <a href="https://github.com/Jonimoose/libfxcg">PrizmSDK</a> and building your first add-in on macOS.
