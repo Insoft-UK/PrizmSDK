@@ -173,7 +173,7 @@
         }
         cursor.texture.filteringMode = SKTextureFilteringNearest;
     }
-    cursor.hidden = (!cursorSettings._uknown);
+    cursor.hidden = (!cursorSettings._unknown);
     
     
     [mutableTexture modifyPixelDataWithBlock:^(void * _Nullable pixelDataPtr, NSUInteger lengthInBytes) {

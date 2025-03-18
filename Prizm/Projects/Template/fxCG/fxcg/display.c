@@ -25,7 +25,7 @@
 
 #include "fxcg.h"
 
-static char _fxCG_StatusArea_ColorA = TEXT_COLOR_WHITE, _fxCG_StatusArea_ColorB = TEXT_COLOR_WHITE;
+static char _fxCG_StatusArea_ColorA = TextColorWhite, _fxCG_StatusArea_ColorB = TextColorWhite;
 
 // DRAM is RGB565 regardless of VRAM RGB565 or RGB111
 static color_t _DD[396 * 224];
@@ -545,11 +545,11 @@ unsigned int Cursor_GetSettings(TCursorSettings *cursorSettings)
 void Cursor_SetFlashOn(TCursorType cursorType)
 {
     _fxCG_CursorSettings.cursorFlashFlag = cursorType;
-    _fxCG_CursorSettings._uknown = 1;
+    _fxCG_CursorSettings._unknown = 1;
 }
 void Cursor_SetFlashOff(void)
 {
-    _fxCG_CursorSettings._uknown = 0;
+    _fxCG_CursorSettings._unknown = 0;
 }
 
 int Cursor_SetPosition(int x, int y)

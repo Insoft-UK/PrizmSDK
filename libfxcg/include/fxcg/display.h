@@ -165,7 +165,7 @@
 #define COLOR_WHITE                 0xFFFF
 #define COLOR_WHITESMOKE                 0xF7BE
 #define COLOR_YELLOW                 0xFFE0
-#define COLOR_YELLOWGREEN                 0x9E66
+#define COLOR_YELLOWGREEN           0x9E66
 
 // MARK: - Types
 
@@ -258,10 +258,6 @@ typedef enum : int {
     BatteryIconHide = 0, BatteryIconShow = 1
 } TBatteryIcon;
 
-typedef enum : int {
-    BatteryTypeAlkaline = 1, BatteryTypeNiMH = 2
-} TBatteryType;
-
 typedef struct {
     unsigned int   _unknown_1;         // unknown: changes indicator height, set to 0
     unsigned int    indicatorMaximum;  // max logical indicator range
@@ -282,7 +278,7 @@ typedef struct {
   unsigned short _unknown_3; // set to 0x01
   unsigned short _unknown_4; // set to 0xF800
   unsigned short *bitmap;    // pointer to the bitmap to set as background.
-} TBGRbitmap
+} TBGRbitmap;
 
 inline TBGRbitmap BGRbitmapMake(color_t *bitmap) {
     return (TBGRbitmap){.width = 384, .height = 192, 0x10, 0, 1, 0xF800, .bitmap = bitmap};
@@ -295,35 +291,27 @@ typedef enum {
     DeviceTypeSimulator = -1
 } TDeviceType;
 
-inline TDeviceType GetDeviceType(void) {
-#if TARGET_PRIZM
-    return (unsigned int)GetVRAMAddress() == 0xAC000000 ? DeviceTypeCG50 : DeviceTypeCG20;
-#else
-    return DeviceTypeSimulator;
-#endif
-}
-
 typedef enum {
-    BackgroundModeMatrix               = 0,  // Matrix Mode Background
-    BackgroundModeEquation             = 1,  // Equation Mode Background
-    BackgroundModeEActivity            = 2,  // eActivity Mode Background
-    BackgroundModeProgram              = 3,  // Program Mode Background
-    BackgroundModeFinancial            = 4,  // Financial Mode Background
-    BackgroundModeWakeupEnable         = 5,  // "Wakeup enable" background (Link mode)
-    BackgroundModeBackup               = 6,  // "Backup" background (Memory mode)
-    BackgroundModeSystem               = 7,  // System Mode Background
-    BackgroundModeLanguage             = 8,  // Language Background
-    BackgroundModeSearchForProgram     = 9,  // "Search For Program" background (Program mode)
-    BackgroundModeNewFile              = 10, // "New File" Background
-    BackgroundModeConversion           = 11, // Conversion Mode Background
-    BackgroundModeOpenSpreadsheet      = 12, // "Open Spreadsheet" Background
-    BackgroundModeSaveSpreadsheet      = 13, // "Save" Background (Spreadsheet mode)
-    BackgroundModeCaptureSet           = 14, // "Capture Set Mode" background (Link Mode)
-    BackgroundModeOpenGeometryFile     = 15, // Open Geometry File Background
-    BackgroundModeSelectCableType      = 16, // "Select Cable Type" background (Link Mode)
-    BackgroundModeSelectCableTypeAlt   = 17, // Same as 16
-    BackgroundModePCToCalcTransfer     = 18  // PC => Calc Transfer Background (Link Mode)
-} TBackgroundMode;
+    BackgroundMatrix               = 0,  // Matrix Mode Background
+    BackgroundEquation             = 1,  // Equation Mode Background
+    BackgroundEActivity            = 2,  // eActivity Mode Background
+    BackgroundProgram              = 3,  // Program Mode Background
+    BackgroundFinancial            = 4,  // Financial Mode Background
+    BackgroundWakeupEnable         = 5,  // "Wakeup enable" background (Link mode)
+    BackgroundBackup               = 6,  // "Backup" background (Memory mode)
+    BackgroundSystem               = 7,  // System Mode Background
+    BackgroundLanguage             = 8,  // Language Background
+    BackgroundSearchForProgram     = 9,  // "Search For Program" background (Program mode)
+    BackgroundNewFile              = 10, // "New File" Background
+    BackgroundConversion           = 11, // Conversion Mode Background
+    BackgroundOpenSpreadsheet      = 12, // "Open Spreadsheet" Background
+    BackgroundSaveSpreadsheet      = 13, // "Save" Background (Spreadsheet mode)
+    BackgroundCaptureSet           = 14, // "Capture Set Mode" background (Link Mode)
+    BackgroundOpenGeometryFile     = 15, // Open Geometry File Background
+    BackgroundSelectCableType      = 16, // "Select Cable Type" background (Link Mode)
+    BackgroundSelectCableTypeAlt   = 17, // Same as 16
+    BackgroundPCToCalcTransfer     = 18  // PC => Calc Transfer Background (Link Mode)
+} TBackground;
 
 #ifdef __cplusplus
 extern "C" {
@@ -351,6 +339,13 @@ extern "C" {
     
     // MARK: - VRAM general display manipulating syscalls:
     void *GetVRAMAddress(void); // Return a pointer to the system's video memory.
+    inline TDeviceType GetDeviceType(void) {
+    #if TARGET_PRIZM
+        return (unsigned int)GetVRAMAddress() == 0xAC000000 ? DeviceTypeCG50 : DeviceTypeCG20;
+    #else
+        return DeviceTypeSimulator;
+    #endif
+    }
     void *GetSecondaryVRAMAddress(void); // Return a pointer to the memory used by SaveVRAM_1 and LoadVRAM_1.
     void Bdisp_AllClr_VRAM(void);
     void Bdisp_SetPoint_VRAM(int x, int y, color_t color);
@@ -360,7 +355,7 @@ extern "C" {
     void LoadVRAM_1(void);
     void Bdisp_Fill_VRAM(int color, int mode);
     
-    void SetBackGround(TBackgroundMode mode);
+    void SetBackGround(TBackground background);
     void WriteBackground(void* target, int width, int height, void* source, int P5, int P6, int P7);
     
     // MARK: - DD display manipulating syscalls:
@@ -398,7 +393,7 @@ extern "C" {
     
     
     // MARK: - Background-related syscalls
-    void SetBackGround(int);
+    void SetBackGround(TBackground background);
     void WriteBackground(void *target, int width, int height, void*source, int, int, int);
     
     // MARK: - Message boxes, error messages, dialogs and the like:
@@ -447,7 +442,7 @@ extern "C" {
      * - Syscall index: 0x08C7
      * - Function signature: `void Cursor_SetFlashOn(unsigned char cursor_type)`
      */
-    void Cursor_SetFlashOn(CursorType cursorType);
+    void Cursor_SetFlashOn(TCursorType cursorType);
     
     void Cursor_SetFlashOff(void);
     
@@ -535,7 +530,6 @@ extern "C" {
     void d_c_Icon(unsigned int);
     
     void BatteryIcon(TBatteryIcon);
-    TBatteryType GetBatteryType(void);
     
     void KeyboardIcon(unsigned int);
     void LineIcon(unsigned int);

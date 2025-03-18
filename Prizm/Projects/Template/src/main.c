@@ -42,7 +42,7 @@ void AddIn_setup(void)
     Bdisp_AllClr_VRAM();
     Bdisp_EnableColor(ColorModeFull);
     
-    char indexColor = TEXT_COLOR_WHITE;
+    char indexColor = TextColorWhite;
     DefineStatusAreaFlags(3, SAF_BATTERY , &indexColor, &indexColor);
     EnableStatusArea(StatusAreaEnabled);
 }
@@ -65,18 +65,14 @@ int AddIn_main(int argc, const char * argv[])
      to use a while loop to keep the add-in running.
      */
     
-    
-    unsigned char cursor_type = 0;
-    
-    Cursor_SetPosition(0, 7);
-    Cursor_SetFlashOn(CursorTypeNormal);
+    TBackground background = BackgroundMatrix;
     
     while (true) {
-        
+        SetBackGround(background);
         GetKey(&key);
         
-        if (key == KEY_CTRL_UP && cursor_type <= 12) Cursor_SetFlashOn(++cursor_type);
-        if (key == KEY_CTRL_DOWN && cursor_type > 0) Cursor_SetFlashOn(--cursor_type);
+        if (key == KEY_CTRL_UP && background != BackgroundMatrix) background--;
+        if (key == KEY_CTRL_DOWN && background != BackgroundPCToCalcTransfer) background++;
     }
     
     return 0;
