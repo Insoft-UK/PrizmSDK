@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #import "Scene.h"
+#import "fxcg/fxcg.h"
 #import "DisplayNode.h"
 #import <keyboard.h>
 
@@ -54,9 +55,12 @@ extern int AddIn_main(int argc, const char *argv[]);
     self.displayNode = [[DisplayNode alloc] init];
     [self addChild:self.displayNode];
 
-    self.size = CGSizeMake(396, 224);
     self.displayNode.position = CGPointMake(396 / 2, 224 / 2);
+    self.backgroundColor = NSColor.blackColor;
 
+    NSString *pathToBundle = NSBundle.mainBundle.resourceURL.path;
+    SetBundlePath([pathToBundle cStringUsingEncoding:NSUTF8StringEncoding]);
+    
     [self startInfiniteLoop];
 }
 
@@ -67,9 +71,16 @@ extern int AddIn_main(int argc, const char *argv[]);
 // MARK: - Keyboard Events
 
 - (void)keyDown:(NSEvent *)event {
-//    BOOL shift = (event.modifierFlags & NSEventModifierFlagShift) != 0;
+    BOOL shift = (event.modifierFlags & NSEventModifierFlagShift) != 0;
+    
+    if (event.keyCode == 0x0A) {
+        fxCG_KeyDown(KEY_PRGM_SHIFT);
+        _fxCG_SAF |= SAF_ALPHA_SHIFT;
+    }
 
     switch (event.keyCode) {
+        
+            
         case 1:  fxCG_KeyDown(K_Sin); break;
         case 8:  fxCG_KeyDown(K_Cos); break;
         case 17: fxCG_KeyDown(K_Tan); break;

@@ -43,7 +43,7 @@ void AddIn_setup(void)
     Bdisp_EnableColor(ColorModeFull);
     
     char indexColor = TextColorWhite;
-    DefineStatusAreaFlags(3, SAF_BATTERY , &indexColor, &indexColor);
+    DefineStatusAreaFlags(3, SAF_BATTERY | SAF_ALPHA_SHIFT , &indexColor, &indexColor);
     EnableStatusArea(StatusAreaEnabled);
 }
 

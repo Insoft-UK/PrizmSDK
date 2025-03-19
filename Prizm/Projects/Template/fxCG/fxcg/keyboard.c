@@ -233,7 +233,7 @@ int GetKey( int *key )
     
     do {
         keycode = PRGM_GetKey();
-        OS_InnerWait_ms(10);
+        OS_InnerWait_ms(5);
     } while (!keycode);
     
     // CR
@@ -269,7 +269,7 @@ int GetKeyWait_OS(int *column, int *row, int type_of_waiting, int timeout_period
         
         if (type_of_waiting == KEYWAIT_HALTOFF_TIMEROFF && *keycode == 0) return KEYREP_NOEVENT;
         
-        OS_InnerWait_ms(10);
+        OS_InnerWait_ms(5);
         
         if (type_of_waiting == KEYWAIT_HALTON_TIMERON) {
             time++;

@@ -1,6 +1,7 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2025 Insoft. All rights reserved.
+// Copyright (c) 2024-2025 Insoft. All rights reserved.
+// Originally created in 2023
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,44 +21,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef fxcg_h
-#define fxcg_h
+#ifndef bmp_hpp
+#define bmp_hpp
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <vector>
 
-#include <display.h>
-#include <keyboard.h>
-
-#define FXCG_KEY_REG _fxCG_0xA44B0000
-#define FXCG_DD_REG  _fxCG_DDRegister
-
-typedef struct {
-    unsigned short B : 1;
-} fxCG_DDRegister;
-
-extern fxCG_DDRegister _fxCG_DDRegister;
-
-extern int _fxCG_KMI_Shift;
-extern int _fxCG_KMI_Alpha;
-extern int _fxCG_KMI_Clip;
-
-extern int _fxCG_StatusArea;
-extern unsigned short _fxCG_SAF;
-
-extern unsigned char _fxCG_0xA44B0000[12];
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace bmp {
+    typedef struct {
+        uint16_t width;
+        uint16_t height;
+        uint8_t  bpp;
+        std::vector<uint32_t> palette; // !Palette stored in RGBA format.
+        std::vector<uint8_t> bytes;
+    } TImage;
     
-    void SetBundlePath(const char *path);
-    const char *GetBundlePath(void);
-    void *GetDDAddress(void);
-    uint16_t fxCG_SAF(void);
+    /**
+     @brief    Loads a file in the Bitmap (BMP) format.
+     @param    filename The filename of the Bitmap (BMP) to be loaded.
+     @return   A structure containing the bitmap image data.
+     */
+    TImage load(const char *filename);
     
-#ifdef __cplusplus
+    /**
+     @brief    Saves a file in the Bitmap (BMP) format.
+     @param    filename The filename of the Bitmap (BMP) to be saved.
+     @param    image A structure containing the bitmap image data.
+     */
+    bool save(const char *filename, const TImage &image);
 }
-#endif
 
-#endif /* fxcg_h */
+#endif /* bmp_hpp */

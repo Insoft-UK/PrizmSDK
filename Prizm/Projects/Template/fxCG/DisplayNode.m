@@ -24,19 +24,17 @@
 #import "DisplayNode.h"
 #import "fxcg.h"
 
+
 @interface DisplayNode () {
     SKMutableTexture *mutableTexture;
     SKSpriteNode *display;
-    SKSpriteNode *battery;
-    SKSpriteNode *shift;
-    SKSpriteNode *alphaSymbol;
     SKSpriteNode *cursor;
-    NSArray<SKTexture *> *alphaFrames;
 }
 
 @end
 
 @implementation DisplayNode
+
 
 // Singleton Instance
 + (instancetype)sharedInstance {
@@ -70,25 +68,6 @@
     display.texture.filteringMode = SKTextureFilteringNearest;
     display.zPosition = 1;
     
-    [self setupBattery];
-
-    alphaFrames = @[
-        [SKTexture textureWithImageNamed:@"Alpha"],
-        [SKTexture textureWithImageNamed:@"AlphaLocked"]
-    ];
-    
-    alphaSymbol = [SKSpriteNode spriteNodeWithTexture:alphaFrames[0]];
-    alphaSymbol.anchorPoint = CGPointZero;
-    alphaSymbol.position = CGPointMake(-198 + 6 + 18, 112 - 22);
-    alphaSymbol.texture.filteringMode = SKTextureFilteringNearest;
-    [display addChild:alphaSymbol];
-    
-    shift = [SKSpriteNode spriteNodeWithImageNamed:@"Shift"];
-    shift.anchorPoint = CGPointZero;
-    shift.position = CGPointMake(-198 + 6 + 18, 112 - 22);
-    shift.texture.filteringMode = SKTextureFilteringNearest;
-    [display addChild:shift];
-    
     
     // Cursor
     cursor = [SKSpriteNode spriteNodeWithImageNamed:@"Cursor"];
@@ -105,29 +84,54 @@
     Cursor_GetSettings(&cursorSettings);
     cursor.position = CGPointMake(-198 + 6 + cursorSettings.cursorX * cursor.size.width, -120 + cursorSettings.cursorY * cursor.size.height + cursor.size.height / 2);
     [display addChild:cursor];
+    
+
+    NSString *shaderPath = [[NSBundle mainBundle] pathForResource:@"fxCG" ofType:@"fsh"]; // Load from the app's bundle
+    NSError *error = nil;
+    NSString *shaderSource = [NSString stringWithContentsOfFile:shaderPath encoding:NSUTF8StringEncoding error:&error];
+
+    if (error) {
+        NSLog(@"Error loading shader file: %@", error.localizedDescription);
+        return;
+    }
+    
+    // Load the shader from the file
+    SKShader *shader = [SKShader shaderWithSource:shaderSource];
+    
+    // Set the RGB adjustment and gamma correction uniforms
+    NSArray<SKUniform *> *uniforms = @[
+        [SKUniform uniformWithName:@"u_rgbAdjust" vectorFloat3:simd_make_float3(0.75, 1.0, 1.4)],
+        [SKUniform uniformWithName:@"u_gamma" float:0.9],
+        [SKUniform uniformWithName:@"u_saturation" float:1.0],
+        [SKUniform uniformWithName:@"u_brightness" float:1.075]
+    ];
+
+    // Apply uniforms to the shader
+    shader.uniforms = uniforms;
+
+    
+    display.shader = shader;
+    
+    for (SKSpriteNode *child in display.children) {
+        child.shader = shader;
+    }
+    
+    if (display.shader != nil) {
+        NSLog(@"Shader applied successfully!");
+    } else {
+        NSLog(@"Shader not applied!");
+    }
 }
 
-// Setup Battery Animation
-- (void)setupBattery {
-    SKTextureAtlas *batteryAtlas = [SKTextureAtlas atlasNamed:@"Battery"];
-    
-    NSArray *batteryFrames = @[
-        [batteryAtlas textureNamed:@"Bat100%"],
-        [batteryAtlas textureNamed:@"Bat75%"],
-        [batteryAtlas textureNamed:@"Bat25%"],
-        [batteryAtlas textureNamed:@"Bat0%"]
-    ];
-    
-    battery = [SKSpriteNode spriteNodeWithTexture:batteryFrames[0]];
-    battery.anchorPoint = CGPointZero;
-    battery.position = CGPointMake(-198 + 6, 112 - 22);
-    battery.texture.filteringMode = SKTextureFilteringNearest;
-    [display addChild:battery];
 
-    SKAction *animateBattery = [SKAction repeatActionForever:
-        [SKAction animateWithTextures:batteryFrames timePerFrame:60 resize:NO restore:YES]];
-    
-    [battery runAction:animateBattery withKey:@"battery"];
+
+
+// Helper method to get the scene resolution
+- (vector_float3)getSceneResolution {
+    float width = (float)mutableTexture.size.width;
+    float height = (float)mutableTexture.size.height;
+    vector_float3 size = {width, height, 0.0f};
+    return size;
 }
 
 // Redraw Method
@@ -194,15 +198,7 @@
         }
     }];
     
-    battery.hidden = !(fxCG_SAF() & StatusFlagBattery);
-    shift.hidden = !(fxCG_SAF() & StatusFlagAlphaShift);
-    alphaSymbol.hidden = !(fxCG_SAF() & StatusFlagText);
     
-    if (fxCG_SAF() & StatusFlagAlphaShift) {
-        alphaSymbol.texture = alphaFrames[1];
-    } else {
-        alphaSymbol.texture = alphaFrames[0];
-    }
 }
 
 @end

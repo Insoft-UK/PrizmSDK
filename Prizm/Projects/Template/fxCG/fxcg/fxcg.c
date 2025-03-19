@@ -21,8 +21,11 @@
 // SOFTWARE.
 
 #include "fxcg.h"
-
+#include <stdio.h>
+#include <string.h>
 #include <display.h>
+
+static char _BundlePath[256];
 
 fxCG_DDRegister _fxCG_DDRegister = {
     .B = 1 /// 1 = Enable 8 color mode
@@ -38,3 +41,13 @@ unsigned char _fxCG_0xA44B0000[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; // keyboard_regi
 int _fxCG_KMI_Shift = 0;
 int _fxCG_KMI_Alpha = 0;
 int _fxCG_KMI_Clip = 0;
+
+void SetBundlePath(const char *path)
+{
+    memcpy(_BundlePath, path, 256);
+}
+
+const char *GetBundlePath(void)
+{
+    return _BundlePath;
+}

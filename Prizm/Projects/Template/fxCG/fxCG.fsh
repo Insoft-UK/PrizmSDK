@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2025 Insoft. All rights reserved.
+// Copyright (c) 2023 Insoft. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,44 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef fxcg_h
-#define fxcg_h
-
-#include <stdint.h>
-#include <stdbool.h>
-
-#include <display.h>
-#include <keyboard.h>
-
-#define FXCG_KEY_REG _fxCG_0xA44B0000
-#define FXCG_DD_REG  _fxCG_DDRegister
-
-typedef struct {
-    unsigned short B : 1;
-} fxCG_DDRegister;
-
-extern fxCG_DDRegister _fxCG_DDRegister;
-
-extern int _fxCG_KMI_Shift;
-extern int _fxCG_KMI_Alpha;
-extern int _fxCG_KMI_Clip;
-
-extern int _fxCG_StatusArea;
-extern unsigned short _fxCG_SAF;
-
-extern unsigned char _fxCG_0xA44B0000[12];
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SetBundlePath(const char *path);
-    const char *GetBundlePath(void);
-    void *GetDDAddress(void);
-    uint16_t fxCG_SAF(void);
-    
-#ifdef __cplusplus
+// Function to adjust saturation
+vec3 adjustSaturation(vec3 color, float saturation) {
+    // Calculate the luminance (perceived brightness)
+    float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    // Interpolate between the grayscale color and the original color
+    return mix(vec3(luminance), color, saturation);
 }
-#endif
 
-#endif /* fxcg_h */
+void main() {
+    // Sample the original color from the texture
+    vec4 color = texture2D(u_texture, v_tex_coord);
+    
+    // Apply RGB adjustments
+    color.rgb *= u_rgbAdjust;
+
+    // Apply saturation adjustment
+    color.rgb = adjustSaturation(color.rgb, u_saturation);
+
+    // Apply gamma correction
+    color.rgb = pow(color.rgb, vec3(u_gamma));
+    
+    // Increase the brightness by adding the brightness factor to each color component
+    color.rgb *= u_brightness;
+
+    // Ensure the values stay within the valid range [0.0, 1.0]
+       color.rgb = clamp(color.rgb, 0.0, 1.0);
+
+     
+
+    // Set the final color
+    gl_FragColor = vec4(color.rgb, color.a);
+}
+
+
