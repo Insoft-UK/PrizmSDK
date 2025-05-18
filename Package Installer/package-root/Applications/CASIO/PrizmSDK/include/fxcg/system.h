@@ -1,10 +1,3 @@
-#ifndef __FXCG_SYSTEM_H
-#define __FXCG_SYSTEM_H
-
-typedef enum : int {
-    BatteryTypeAlkaline = 1, BatteryTypeNiMH = 2
-} TBatteryType;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,8 +10,8 @@ int GetAutoPowerOffTime(void); //returns duration in minutes
 void SetBacklightDuration(char durationInHalfMinutes);
 char GetBacklightDuration(void); //returns duration in half-minutes
 
-void SetBatteryType(TBatteryType type);
-TBatteryType GetBatteryType(void);
+void SetBatteryType(int type);
+int GetBatteryType(void);
 
 int GetMainBatteryVoltage(int one); //parameter should be 1
 void PowerOff(int displayLogo);
@@ -60,6 +53,4 @@ int GlibGetOSVersionInfo(char *major, char *minor, short int *c, short int *d);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

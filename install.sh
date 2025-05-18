@@ -71,20 +71,20 @@ cp -a libfxcg ~/sh3eb-toolchain/
 cp -a mkg3a ~/sh3eb-toolchain/
 cd ~/sh3eb-toolchain
 
-if [ ! -d "gcc" ]; then
-    if [ ! -f "gcc-14.2.0.tar.gz" ]; then
-        wget https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.gz
-    fi
-    mkdir -p gcc
-    tar -xzvf gcc-14.2.0.tar.gz --strip-components=1 -C gcc
-fi
-
 if [ ! -d "binutils" ]; then
     if [ ! -f "binutils-2.36.tar.gz" ]; then
-        wget https://ftp.gnu.org/gnu/binutils/binutils-2.36.tar.gz
+        wget https://ftp.gnu.org/gnu/binutils/binutils-2.36.1.tar.gz
     fi
     mkdir -p binutils
-    tar -xvzf binutils-2.36.tar.gz --strip-components=1 -C binutils
+    tar -xvzf binutils-*.tar.gz --strip-components=1 -C binutils
+fi
+
+if [ ! -d "gcc" ]; then
+    if [ ! -f "gcc-14.2.0.tar.gz" ]; then
+        wget https://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.gz
+    fi
+    mkdir -p gcc
+    tar -xzvf gcc-*.tar.gz --strip-components=1 -C gcc
 fi
 
 #Build...
@@ -92,7 +92,11 @@ fi
 if [ ! -d "binutils/build" ]; then
     mkdir ~/sh3eb-toolchain/binutils/build
     cd ~/sh3eb-toolchain/binutils/build
-    ../configure --target=sh3eb-elf --prefix=/Applications/CASIO/PrizmSDK --disable-nls --disable-werror
+    ../configure \
+    --target=sh3eb-elf \
+    --prefix=/Applications/CASIO/PrizmSDK \
+    --disable-nls \
+    --disable-werror
     make -j$(sysctl -n hw.ncpu) # Use all CPU cores
     make install
 fi
@@ -105,6 +109,7 @@ if [ ! -f "$FXCGSDK/bin/sh3eb-elf-ld" ]; then
     echo "sh3eb-elf-ld missing, failed to install."
     exit
 fi
+
 
 read -p "Press Enter to continue..."
 

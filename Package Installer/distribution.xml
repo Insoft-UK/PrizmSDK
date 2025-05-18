@@ -2,13 +2,13 @@
 <installer-gui-script minSpecVersion="1">
     <title>PrizmSDK</title>
     <background file="background.png" file-2x="background@2x.png" alignment="center" scaling="proportional"/>
-    <welcome file="welcome.txt"/>
-    <license file="license.txt"/>
+    <welcome file="welcome.rtf"/>
+    <license file="license.rtf"/>
     <choices-outline>
         <line choice="default"/>
     </choices-outline>
     <choice id="default" title="Install PrizmSDK">
-        <pkg-ref id="uk.insoft.PrizmSDK"/>
+        <pkg-ref id="uk.insoft.prizmsdk"/>
     </choice>
-    <pkg-ref id="uk.insoft.PrizmSDK" installKBytes="148228" version="1.0" onConclusion="none">PrizmSDK-signed.pkg</pkg-ref>
+    <pkg-ref id="uk.insoft.prizmsdk" installKBytes="152828" version="1.0" onConclusion="none">prizmsdk.pkg</pkg-ref>
 </installer-gui-script>

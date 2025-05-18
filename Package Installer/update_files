@@ -1,0 +1,24 @@
+#!/bin/bash
+DIR=$(dirname "$0")
+clear
+echo "fxCG Sync."
+echo "Copyright © 2024 Insoft. All rights reserved.\n"
+
+cd "$DIR"
+
+cp $FXCGSDK/include/fxcg/display.h ../libfxcg/include/fxcg/display.h
+cp $FXCGSDK/include/fxcg/app.h ../libfxcg/include/fxcg/app.h
+cp $FXCGSDK/include/fxcg/file.h ../libfxcg/include/fxcg/file.h
+cp $FXCGSDK/include/fxcg/heap.h ../libfxcg/include/fxcg/heap.h
+cp $FXCGSDK/include/fxcg/keyboard.h ../libfxcg/include/fxcg/keyboard.h
+cp $FXCGSDK/include/fxcg/misc.h ../libfxcg/include/fxcg/misc.h
+cp $FXCGSDK/include/fxcg/rtc.h ../libfxcg/include/fxcg/rtc.h
+cp $FXCGSDK/include/fxcg/serial.h ../libfxcg/include/fxcg/serial.h
+cp $FXCGSDK/include/fxcg/system.h ../libfxcg/include/fxcg/system.h
+cp $FXCGSDK/include/fxcg/tmu.h ../libfxcg/include/fxcg/tmu.h
+cp $FXCGSDK/include/fxcg/usb.h ../libfxcg/include/fxcg/usb.h
+
+cp -rf $HOME/Documents/Prizm/Projects/Template package-root/private/tmp/PrizmSDK/Prizm/Projects
+
+# Close the Terminal window
+osascript -e 'tell application "Terminal" to close window 1' & exit

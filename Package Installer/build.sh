@@ -1,25 +1,18 @@
 #!/bin/bash
 
-# Your AppleID, TeamID and Password (An app-specific password NOT! AppleID password)
-APPLE_ID="apple_id@icloud.com"
-TEAM_ID="0AB11C3DEF"
-PASSWORD="aaaa-bbbb-cccc-dddd"
+# Your AppleID, TeamID, Password and Name (An app-specific password NOT! AppleID password)
+if [ -z "$APPLE_ID" ]; then
+    source notarization.sh
+fi
 
 PACKAGEROOT=package-root
-NAME=PrizmSDK
-IDENTIFIER=your.domain.$NAME
-YOUR_NAME="Your Name"
+PRIZMSDK=Applications/CASIO/PrizmSDK
+NAME=prizmsdk
+IDENTIFIER=uk.insoft.$NAME
 
-# re-sign all binarys
-find "$PACKAGEROOT/$PRIZMSDK/bin" -type f -exec codesign --remove-signature {} \;
-find "$PACKAGEROOT/$PRIZMSDK/bin" -type f -exec codesign --sign "Developer ID Application: $YOUR_NAME ($TEAM_ID)" --options runtime --timestamp {} \;
+find . -name '*.DS_Store' -type f -delete
 
-find "$PACKAGEROOT/$PRIZMSDK/sh3eb-elf/bin" -type f -exec codesign --remove-signature {} \;
-find "$PACKAGEROOT/$PRIZMSDK/sh3eb-elf/bin" -type f -exec codesign --sign "Developer ID Application: $YOUR_NAME ($TEAM_ID)" --options runtime --timestamp {} \;
-
-find "$PACKAGEROOT/$PRIZMSDK/libexec/gcc/sh3eb-elf" -type f -exec codesign --remove-signature {} \;
-find "$PACKAGEROOT/$PRIZMSDK/libexec/gcc/sh3eb-elf" -type f -exec codesign --sign "Developer ID Application: $YOUR_NAME ($TEAM_ID)" --options runtime --timestamp {} \;
-
+chmod 644 resources/background.png resources/background@2x.png
 
 pkgbuild --root package-root \
          --identifier $IDENTIFIER \
@@ -33,6 +26,15 @@ xcrun notarytool submit --apple-id $APPLE_ID \
                         --password $PASSWORD \
                         --team-id $TEAM_ID \
                         --wait $NAME-signed.pkg
+                        
+# Staple
+xcrun stapler staple $NAME-signed.pkg
+
+# Verify
+xcrun stapler validate $NAME-signed.pkg
+
+# Gatekeeper
+spctl --assess --type install --verbose $NAME-signed.pkg
 
 ./update_distribution.sh
 productbuild --distribution distribution.xml \
@@ -47,10 +49,16 @@ xcrun notarytool submit --apple-id $APPLE_ID \
                         --team-id $TEAM_ID \
                         --wait $NAME-installer-signed.pkg
                         
+# Staple
+xcrun stapler staple $NAME-installer-signed.pkg
+
+# Verify
+xcrun stapler validate $NAME-installer-signed.pkg
+
+# Gatekeeper
+spctl --assess --type install --verbose $NAME-installer-signed.pkg
 
 rm -r $NAME.pkg
 rm -r $NAME-signed.pkg
 rm -r $NAME-installer.pkg
-
-spctl -a -v $NAME-installer-signed.pkg
 mv $NAME-installer-signed.pkg $NAME.pkg

@@ -251,8 +251,9 @@ typedef struct {
 } TBdispGrapth;
 
 typedef enum : int {
-    StatusAreaEnabled = 0, StatusAreaDisable = 3
+    StatusAreaEnabled = 2, StatusAreaDisable = 3
 } TStatusArea;
+
 
 typedef enum : int {
     BatteryIconHide = 0, BatteryIconShow = 1

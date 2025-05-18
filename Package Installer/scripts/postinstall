@@ -26,4 +26,21 @@ grep -qxF 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK
 grep -qxF 'export FXCGSDK=/Applications/CASIO/PrizmSDK' ~/.zshrc || echo 'export FXCGSDK=/Applications/CASIO/PrizmSDK' >> ~/.zshrc
 source ~/.zshrc
 
+# Detect the currently logged-in user (excluding root)
+CURRENT_USER=$(stat -f%Su /dev/console)
+
+# Define the target home directory
+USER_HOME="/Users/$CURRENT_USER"
+
+cp -R /private/tmp/PrizmSDK/Prizm "$USER_HOME/Documents"
+rm -r /private/tmp/PrizmSDK
+chown -R "$CURRENT_USER" "$USER_HOME/Documents/Prizm"
+chgrp -R staff "$USER_HOME/Documents/Prizm"
+
+find /Applications/CASIO/PrizmSDK/bin -type f -exec codesign --remove-signature {} \;
+find /Applications/CASIO/PrizmSDK/sh3eb-elf/bin -type f -exec codesign --remove-signature {} \;
+find /Applications/CASIO/PrizmSDK/libexec/gcc/sh3eb-elf -type f -exec codesign --remove-signature {} \;
+find /Applications/CASIO/PrizmSDK/lib -type f -exec codesign --remove-signature {} \;
+
+
 exit 0

@@ -1,3 +1,0 @@
-Welcome to PrizmSDK
-
-The SDK packages provide everything you need to build programs, including a compiler. You should use these unless you know you want to do something different.

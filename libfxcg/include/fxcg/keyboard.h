@@ -201,6 +201,18 @@
 #define KEYREP_KEYEVENT             1
 #define KEYREP_TIMEREVENT           2
 
+typedef enum : unsigned char {
+    K_F1    = 79, K_F2       = 69, K_F3     = 59, K_F4    = 49, K_F5     = 39, K_F6    = 29,
+    K_Shift = 78, K_Optn     = 68, K_Vars   = 58, K_Menu  = 48, K_Left   = 38, K_Up    = 28,
+    K_Alpha = 77, K_Sq       = 67, K_Power  = 57, K_Exit  = 47, K_Down   = 37, K_Right = 27,
+    K_XAngT = 76, K_Log      = 66, K_Ln     = 56, K_Sin   = 46, K_Cos    = 36, K_Tan   = 26,
+    K_Abc   = 75, K_SwapDisp = 65, K_CubeRt = 55, K_InvX  = 45, K_Comma  = 35, K_Ans   = 25,
+    K_7     = 74, K_8        = 64, K_9      = 54, K_Del   = 44, K_On     = 10,
+    K_4     = 73, K_5        = 63, K_6      = 53, K_Mult  = 43, K_Div    = 33,
+    K_1     = 72, K_2        = 62, K_3      = 52, K_Add   = 42, K_Minus  = 32,
+    K_0     = 71, K_Dot      = 61, K_Exp    = 51, K_Neg   = 41, K_Return = 31, K_NONE  = 0
+} TKeyCode;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
