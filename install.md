@@ -1,3 +1,6 @@
+# BUILD & Installing PrizmSDK for macOS
+
+### Make sure macOS knows the path of the PrizmSDK.
 ```
 export FXCGSDK=/Applications/CASIO/PrizmSDK
 grep -qxF 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' ~/.zshrc || echo 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' >> ~/.zshrc
@@ -5,16 +8,16 @@ grep -qxF 'export FXCGSDK=/Applications/CASIO/PrizmSDK' ~/.zshrc || echo 'export
 source ~/.zshrc
 ```
 
-```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"``
-
-```brew install libpng cmake gmp mpfr libmpc isl wget make gcc```
-
+### Install PrizmSDK for macOS
 ```
 mkdir -p ~/sh3eb-toolchain
 cp -a libfxcg ~/sh3eb-toolchain/
 cp -a mkg3a ~/sh3eb-toolchain/
 cd ~/sh3eb-toolchain
+```
 
+### Build & Install BINUTILS
+```
 wget https://ftp.gnu.org/gnu/binutils/binutils-2.36.1.tar.gz
 mkdir -p binutils
 tar -xvzf binutils-*.tar.gz --strip-components=1 -C binutils
@@ -23,11 +26,13 @@ cd ~/sh3eb-toolchain/binutils/build
 ../configure --target=sh3eb-elf --prefix=$FXCGSDK --disable-nls --disable-werror
 make -j$(sysctl -n hw.ncpu) # Use all CPU cores
 make install
+```
 
+### Build & Install GCC
+```
 wget https://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.gz
 mkdir -p gcc
 tar -xzvf gcc-*.tar.gz --strip-components=1 -C gcc
-
 mkdir ~/sh3eb-toolchain/gcc/build
 cd ~/sh3eb-toolchain/gcc/build
 ../configure \
@@ -40,28 +45,34 @@ cd ~/sh3eb-toolchain/gcc/build
 --without-headers \
 --disable-nls \
 --disable-libssp
-
 make -j$(sysctl -n hw.ncpu) all-gcc
 make install-gcc
-   
 $FXCGSDK/bin/sh3eb-elf-gcc --version
-find $FXCGSDK -name "sh3eb-elf-gcc"
+```
 
+### Build & Install mkg3a
+```
 cd ~/sh3eb-toolchain/mkg3a
 cmake . -DCMAKE_INSTALL_PREFIX=$FXCGSDK
 make
 make install
+```
 
+### Build & Install libfxcg
+```
 cd ~/sh3eb-toolchain/libfxcg
 make CC=$FXCGSDK/sh3eb-elf/bin/sh3eb-elf-gcc
 make
 make install
-
 cp lib/*.a $FXCGSDK/lib/
 cp -a toolchain $FXCGSDK/
 cp -a include $FXCGSDK/
-cd ~/
-
+```
+### Cleanup!
+```
 rm -r ~/sh3eb-toolchain
 ```
 
+>[!NOTE]
+You will require `libpng gmp mpfr libmpc` are installed.
+`brew install libpng gmp mpfr libmpc`.
