@@ -1,4 +1,4 @@
-# BUILD & Installing PrizmSDK for macOS
+# Build and Install PrizmSDK for macOS
 
 ### Environment Paths
 > Ensure macOS can locate the PrizmSDK by adding it to your system’s environment paths.
@@ -9,19 +9,22 @@ grep -qxF 'export FXCGSDK=/Applications/CASIO/PrizmSDK' ~/.zshrc || echo 'export
 source ~/.zshrc
 ```
 
-### Install PrizmSDK for macOS
+### Download PrizmSDK
 ```
 mkdir -p ~/sh3eb-toolchain
 cp -a libfxcg ~/sh3eb-toolchain/
 cp -a mkg3a ~/sh3eb-toolchain/
 cd ~/sh3eb-toolchain
+wget https://ftp.gnu.org/gnu/binutils/binutils-2.36.1.tar.gz
+mkdir -p binutils
+tar -xvzf binutils-*.tar.gz --strip-components=1 -C binutils
+wget https://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.gz
+mkdir -p gcc
+tar -xzvf gcc-*.tar.gz --strip-components=1 -C gcc
 ```
 
 ### Build & Install BINUTILS
 ```
-wget https://ftp.gnu.org/gnu/binutils/binutils-2.36.1.tar.gz
-mkdir -p binutils
-tar -xvzf binutils-*.tar.gz --strip-components=1 -C binutils
 mkdir ~/sh3eb-toolchain/binutils/build
 cd ~/sh3eb-toolchain/binutils/build
 ../configure --target=sh3eb-elf --prefix=$FXCGSDK --disable-nls --disable-werror
@@ -31,9 +34,6 @@ make install
 
 ### Build & Install GCC
 ```
-wget https://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.gz
-mkdir -p gcc
-tar -xzvf gcc-*.tar.gz --strip-components=1 -C gcc
 mkdir ~/sh3eb-toolchain/gcc/build
 cd ~/sh3eb-toolchain/gcc/build
 ../configure \
