@@ -1,8 +1,9 @@
 # BUILD & Installing PrizmSDK for macOS
 
-### Make sure macOS knows the path of the PrizmSDK.
-```
-export FXCGSDK=/Applications/CASIO/PrizmSDK
+### Environment Paths
+> Ensure macOS can locate the PrizmSDK by adding it to your system’s environment paths.
+
+```export FXCGSDK=/Applications/CASIO/PrizmSDK
 grep -qxF 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' ~/.zshrc || echo 'export PATH=/Applications/CASIO/PrizmSDK:/Applications/CASIO/PrizmSDK/bin:/Applications/CASIO/PrizmSDK/sh3eb-elf/bin:$PATH' >> ~/.zshrc
 grep -qxF 'export FXCGSDK=/Applications/CASIO/PrizmSDK' ~/.zshrc || echo 'export FXCGSDK=/Applications/CASIO/PrizmSDK' >> ~/.zshrc
 source ~/.zshrc
