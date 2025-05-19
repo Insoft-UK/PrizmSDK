@@ -1,6 +1,7 @@
 # Build and Install PrizmSDK for macOS
 
 ### Environment Paths
+>[!IMPORTANT]
 > Ensure macOS can locate the PrizmSDK by adding it to your system’s environment paths.
 
 ```export FXCGSDK=/Applications/CASIO/PrizmSDK
