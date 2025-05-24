@@ -15,13 +15,13 @@ source ~/.zshrc
 mkdir -p ~/sh3eb-toolchain
 cp -a libfxcg ~/sh3eb-toolchain/
 cd ~/sh3eb-toolchain
+```
 
 ### Build & Update libfxcg
 ```
 cd ~/sh3eb-toolchain/libfxcg
 make CC=$FXCGSDK/sh3eb-elf/bin/sh3eb-elf-gcc
-make
-make install
+make all
 cp lib/*.a $FXCGSDK/lib/
 cp -a toolchain $FXCGSDK/
 cp -a include $FXCGSDK/
