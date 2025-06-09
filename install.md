@@ -76,5 +76,5 @@ rm -r ~/sh3eb-toolchain
 ```
 
 >[!NOTE]
-You will require `libpng gmp mpfr libmpc` are installed.
+You will require **libpng gmp mpfr libmpc** are installed.
 `brew install libpng gmp mpfr libmpc`.
